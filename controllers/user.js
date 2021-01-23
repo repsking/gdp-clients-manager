@@ -1,16 +1,18 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const ApiError = require('../Errors/ApiError');
+require('dotenv').config();
 
 exports.login = async ({body: {username, password}}, res, next) => {
+    const errorMessage = "Username or password incorrect"
     try {
-        console.log(process.env)
-        const user = await User.findOne({username});
-        if(!user) res.status(401).json({message: 'Incorrect username'})
 
+        const user = await User.findOne({username});
+        if(!user) throw new ApiError(errorMessage, 401);
         const result = await bcrypt.compare(password, user.password);
         if(!result) {
-            res.status(401).json({message: 'Incorrect password'})
+            throw new ApiError(errorMessage, 401);
         }
         res.json(
             {
