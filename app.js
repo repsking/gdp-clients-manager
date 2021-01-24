@@ -3,13 +3,15 @@ const cors = require("cors");
 const auth = require("./middlewares/auth");
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
-const connectDb = require("./config/db");
+const demandsRouter = require('./routes/demands');
+
+const {connectMongoDb} = require("./config/db");
 const mongoose = require("mongoose");
 const { json } = require('body-parser');
 const API_PREFIX = 'api'
 const app = express();
 
-connectDb();
+connectMongoDb();
 mongoose.set("toJSON", { virtuals: true });
 
 app.use(cors());
@@ -20,6 +22,8 @@ app.use(auth);
 
 // Routes which need Authentification
 app.use(`/${API_PREFIX}`, indexRouter);
+app.use(`/${API_PREFIX}/demands`,demandsRouter);
+
 
 
 app.use((err, req, res, next) => {
