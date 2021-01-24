@@ -21,7 +21,20 @@ const demandSchemas = Schema({
     user: {
         type: userSchemas,
         required: true
+    },
+    handler: {
+        userId: Schema.Types.ObjectId,
+        status: {
+            type: String,
+            default: 'new',
+        },
+    },
+    comment: String,
+    deleted: {
+        type: Boolean,
+        default: false
     }
+
 }, { timestamps: true })
 
 module.exports = model('Demand', demandSchemas);
