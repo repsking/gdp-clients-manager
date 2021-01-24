@@ -29,12 +29,7 @@ const demandSchemas = Schema({
             default: 'new',
         },
     },
-    comment: String,
-    deleted: {
-        type: Boolean,
-        default: false
-    }
-
+    comment: String
 }, { timestamps: true })
 
 module.exports = model('Demand', demandSchemas);
