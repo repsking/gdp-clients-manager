@@ -2,10 +2,31 @@ const Demands = require('../models/demands');
 const User = require('../models/user')
 const ApiError = require('../Errors/ApiError')
 
-exports.addComment = function({params, body}, res, next) {
+exports.addComment = async function({currentUserId, params, body}, res, next) {
     try {
-        const result = Demands.updateOne({_id: params.id}, { comment: body.comment })
-        res.json(result);
+        await Demands.updateOne({_id: params.id}, { 
+            $push: {comments: 
+                {
+                    text: body.comment ,
+                    personnal: body.personnal,
+                    owner: currentUserId 
+                } } })
+        res.status(200).end();
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.removeComment = async function({currentUserId, params, body}, res, next) {
+    try {
+        const demand = await Demands.findOne({_id: params.id});
+        if(!demand.comments.find(comment => comment.id === body.commentId && comment.owner == currentUserId))
+            throw ApiError("You're not allowed to edit or delete this comment", 401);
+        await Demands.updateOne({_id: params.id}, { 
+            $pull: {comments: {
+                    _id: body.commentId
+                } } })
+        res.status(200).end();
     } catch (error) {
         next(error);
     }

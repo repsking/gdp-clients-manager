@@ -29,7 +29,17 @@ const demandSchemas = Schema({
             default: 'new',
         },
     },
-    comment: String
+    comments: [{
+        text: String,
+        personnal: {
+            type: Boolean,
+            default: false,
+        },
+        owner: {
+            type: Schema.Types.ObjectId,
+            ref: 'user'
+        } 
+    }]
 }, { timestamps: true })
 
 module.exports = model('Demand', demandSchemas);
