@@ -61,7 +61,7 @@ const update = async ({params: {id: _id}, body}, res, next) => {
         next(error)
     }
 }
-const remove = async ({params: {_id}}, res, next) => {
+const remove = async ({params: {id: _id}}, res, next) => {
     try {
         await Collection.deleteOne({_id});
         res.status(200).end();
