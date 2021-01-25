@@ -21,7 +21,7 @@ exports.removeComment = async function({currentUserId, params, body}, res, next)
     try {
         const demand = await Demands.findOne({_id: params.id});
         if(!demand.comments.find(comment => comment.id === body.commentId && comment.owner == currentUserId))
-            throw ApiError("You're not allowed to edit or delete this comment", 401);
+            throw new ApiError("You're not allowed to edit or delete this comment", 401);
         await Demands.updateOne({_id: params.id}, { 
             $pull: {comments: {
                     _id: body.commentId
