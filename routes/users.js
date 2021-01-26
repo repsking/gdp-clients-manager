@@ -1,8 +1,9 @@
 const {login, newUser, getUsers} = require('../controllers/user');
-const express = require('express');
-const router = express.Router();
+const User = require('../models/user')
+const generateCrud = require('./utils/generateCrud');
+const router = generateCrud(User);
+
 router.post('/login', login);
 router.post('/newuser', newUser);
-router.get('/list', getUsers);
 
 module.exports = router;
