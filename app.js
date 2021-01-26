@@ -3,6 +3,7 @@ const cors = require("cors");
 const auth = require("./middlewares/auth");
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
+const demandStatusRouter = require('./routes/demandStatus')
 const demandsRouter = require('./routes/demands');
 
 const {connectMongoDb} = require("./config/db");
@@ -23,6 +24,7 @@ app.use(auth);
 // Routes which need Authentification
 app.use(`/${API_PREFIX}`, indexRouter);
 app.use(`/${API_PREFIX}/demands`,demandsRouter);
+app.use(`/${API_PREFIX}/status`, demandStatusRouter)
 
 
 

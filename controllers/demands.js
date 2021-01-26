@@ -1,6 +1,18 @@
 const Demands = require('../models/demands');
 const User = require('../models/user')
+const Status = require('../models/demandStatus')
 const ApiError = require('../Errors/ApiError')
+
+exports.createDemand = async ({body}, res, next) => {
+    try {
+        const statusId = await Status.findIdByCode('new');
+        const result = new Demands({...body, handler: {status: statusId}});
+        if(result) await result.save();
+        res.status(201).json(result);
+    } catch (error) {        
+        next(error)
+    }
+}
 
 exports.addComment = async function({currentUserId, params, body}, res, next) {
     try {
@@ -31,12 +43,24 @@ exports.removeComment = async function({currentUserId, params, body}, res, next)
         next(error);
     }
 };
-exports.assignToUser = function({body: {userId}, params}, res, next) {
-    const userExist = User.exists({_id: userId});
-    if(!userExist) throw new ApiError("Selected user doesnt exist or it's not allowed to handle a contact demand", 400)
+exports.assignToUser = async function({body: {userId}, params}, res, next) {
+    const userExist = await User.exists({_id: userId});
+    const statusId = await Status.findIdByCode('handled')
+    if(!userExist) throw new ApiError("Selected user doesn't exist or it's not allowed to handle a contact demand", 400)
     try {
-        const result = Demands.updateOne({_id: params.id}, { handler: {userId, status: 'handled'} })
-        res.json(result);
+        await Demands.updateOne({_id: params.id}, { handler: {userId, status: statusId} })
+        res.status(200).end();
+    } catch (error) {
+        next(error);
+    }
+}
+
+exports.updateStatus = async function({body: {statusId}, params}, res, next) {
+    const statusExist = await Status.exists({_id: statusId });
+    if(!statusExist) throw new ApiError("This status doesn't exist", 400)
+    try {
+        await Demands.updateOne({_id: params.id}, { handler: { status: statusId } })
+        res.status(200).end();
     } catch (error) {
         next(error);
     }

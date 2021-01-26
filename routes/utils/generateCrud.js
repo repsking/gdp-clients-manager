@@ -2,8 +2,7 @@ const express = require('express');
 const auth = require('../../middlewares/auth')
 const ApiError = require('../../Errors/ApiError')
 
-
-module.exports = (Collection, options = {}) => {
+module.exports = (Collection, {noCreate, noList, noGet, noSearch, noUpdate, noCount, noDelete, needAuth} = {}) => {
 
   const create = async ({body}, res, next) => {
     try {
@@ -43,7 +42,7 @@ const count = async (req, res, next) => {
   }
 };
 
-const one = async ({params: {id: _id}}, res, next) => {
+const get = async ({params: {id: _id}}, res, next) => {
     try {
         const result = await Collection.findOne({_id}).populate('*');
         if(!result) throw ApiError('Ressource Not found', 404)
@@ -72,14 +71,14 @@ const remove = async ({params: {id: _id}}, res, next) => {
 
 const router = express.Router();
 
-if(options.needAuth) router.use(auth);
+if(needAuth) router.use(auth);
 
-router.get('/', list);
-router.get('/count', count);
-router.get('/search/:query', search);
-router.get('/:id', one);
-router.post('/', create);
-router.put('/:id', update);
-router.delete('/:id', remove);
+!noList && router.get('/', list);
+!noCount && router.get('/count', count);
+!noSearch && router.get('/search/:query', search);
+!noGet && router.get('/:id', get);
+!noCreate && router.post('/', create);
+!noUpdate && router.put('/:id', update);
+!noDelete && router.delete('/:id', remove);
 return router;
 }

@@ -25,8 +25,8 @@ const demandSchemas = Schema({
     handler: {
         userId: Schema.Types.ObjectId,
         status: {
-            type: String,
-            default: 'new',
+            type: Schema.Types.ObjectId,
+            ref: 'DemandStatus',
         },
     },
     comments: [{
