@@ -1,6 +1,7 @@
 const express = require('express');
 const auth = require('../../middlewares/auth')
-const ApiError = require('../../Errors/ApiError')
+const ApiError = require('../../Errors/ApiError');
+const ctrlWrapper = require('../../controllers/utils/ctrlWrapper')
 
 module.exports = (Collection, {noCreate, noList, noGet, noSearch, noUpdate, noCount, noDelete, needAuth} = {}) => {
 
@@ -14,14 +15,10 @@ module.exports = (Collection, {noCreate, noList, noGet, noSearch, noUpdate, noCo
     }
 }
 
-const list = async (req, res, next) => {
-    try {
-        const list = await Collection.find();
-        res.json(list);
-    } catch (error) {
-        next(error)
-    }
-};
+const list = ctrlWrapper(async (req, res) => {
+    const list = await Collection.find();
+    res.json(list);
+}) 
 
 const search = async ({params}, res, next) => {
     try {
