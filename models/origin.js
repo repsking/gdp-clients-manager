@@ -2,7 +2,7 @@ const {Schema, model} = require('mongoose');
 const {requiredString} = require('./utils/customSchemaType')
 
 const originSchemas = Schema({
-    name: requiredString,
+    name: {...requiredString, unique: true},
     url: requiredString,
     keywords: [String]
 })

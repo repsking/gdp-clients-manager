@@ -1,5 +1,7 @@
 const {Schema, model} = require('mongoose');
-const {requiredString} = require('./utils/customSchemaType')
+const {requiredString, nameType} = require('./utils/customSchemaType')
+const { emailValidator, phoneValidator } = require('./utils/validators');
+
 
 const programmeSchemas = Schema({
     name: String,
@@ -10,10 +12,16 @@ const programmeSchemas = Schema({
 })
 const userSchemas = Schema({
 
-    name: String,
-    firstname: String,
-    email: requiredString,
-    phone: requiredString,
+    name: nameType,
+    firstname: nameType,
+    email: {
+        ...requiredString,
+        validate: emailValidator
+    },
+    phone: {
+        ...requiredString,
+        validate: phoneValidator
+    },
     zipcode: String
 })
 
@@ -40,10 +48,15 @@ const demandSchemas = Schema({
     },
     url: requiredString,
     handler: {
-        userId: Schema.Types.ObjectId,
+        userId: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            autopopulate: true,
+        },
         status: {
             type: Schema.Types.ObjectId,
-            ref: 'DemandStatus',
+            ref: 'Status',
+            autopopulate: true,
         },
     },
     programme: {
@@ -55,7 +68,8 @@ const demandSchemas = Schema({
         text: String,
         owner: {
             type: Schema.Types.ObjectId,
-            ref: 'user'
+            ref: 'User',
+            autopopulate: true,
         }
     }
 }, { timestamps: true })
@@ -68,4 +82,6 @@ demandSchemas.index({
     'user.email': 'text',
     'profile.something': 'text'
 });
+
+demandSchemas.plugin(require('mongoose-autopopulate'));
 module.exports = model('Demand', demandSchemas);

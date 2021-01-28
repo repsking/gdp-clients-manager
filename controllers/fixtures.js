@@ -1,22 +1,15 @@
 const Origin = require('../models/origin');
 const Role = require('../models/role');
-const DemandeStatus = require('../models/demandStatus');
+const Status = require('../models/status');
 const ctrlWrapper = require('./utils/ctrlWrapper')
+const {origins, roles, status} = require('../models/fixtures');
 
-const {
-    origins,
-    roles,
-    demandStatus,
-  } = require('../fixtures');
-
-
-const creators = [
-    Origin.insertMany(origins),
-    Role.insertMany(roles),
-    DemandeStatus.insertMany(demandStatus)
-  ];
   
-exports.createFixtures = ctrlWrapper(async (req,res) => {
-    await Promise.all(creators);
+exports.generate = ctrlWrapper(async (req,res) => {
+    await Promise.all([
+        Origin.insertMany(origins),
+        Role.insertMany(roles),
+        Status.insertMany(status)
+      ]);
     res.status(201).json({message: "All created"});
   })

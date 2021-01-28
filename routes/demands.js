@@ -6,7 +6,6 @@ const router = generateCrud(Demands, {noCreate: true});
 
 router.post('/', createCommonDemand)
 router.post('/programme', createCommonDemand)
-
 router.post('/addComment/:id',auth, addComment)
 router.post('/removeComment/:id',auth, removeComment)
 router.post('/assignTo/:id', auth, assignToUser)

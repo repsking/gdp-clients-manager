@@ -3,7 +3,7 @@ const {requiredString} = require('./utils/customSchemaType')
 
 const roleSchemas = Schema({
     label: requiredString,
-    name: requiredString,
+    name: {...requiredString, unique: true},
     value: {
         type: Number,
         required: true

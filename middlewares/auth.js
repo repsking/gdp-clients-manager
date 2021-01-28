@@ -1,12 +1,14 @@
 const jwt = require('jsonwebtoken');
-const ApiError = require('../Errors/ApiError');
+const ApiError = require('../errors/ApiError');
 
+
+// 498 HTTP CODE means that the token is expired. Generally, the front disconnect the user in this case.
 module.exports =  (req, res, next) => {
     try {
         const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
-        const decodedToken = jwt.verify(token, process.env.SECRET_AUTH_TOKEN);
-        const userId = decodedToken.userId;
-        if (req.headers.uuid && req.headers.uuid !== userId) throw ApiError('Invalid user ID',498);
+        const decoded = jwt.verify(token, process.env.SECRET_AUTH_TOKEN);
+        const userId = decoded.userId;
+        if (req.headers.uuid && req.headers.uuid !== userId) throw ApiError('Invalid user ID', 498);
         req.currentUserId = userId;
         next()
       } catch(error) {

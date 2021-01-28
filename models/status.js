@@ -16,4 +16,4 @@ statusSchemas.statics.findIdByCode = async function(code) {
     const res = await this.findOne({ code: { $regex } },{_id: 1});
     return res._id;
   };
-module.exports = model('DemandStatus', statusSchemas);
+module.exports = model('Status', statusSchemas);

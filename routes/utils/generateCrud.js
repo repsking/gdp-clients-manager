@@ -1,6 +1,6 @@
 const express = require('express');
 const auth = require('../../middlewares/auth')
-const ApiError = require('../../Errors/ApiError');
+const ApiError = require('../../errors/ApiError');
 const ctrlWrapper = require('../../controllers/utils/ctrlWrapper');
 
 module.exports = (Collection, {noCreate, noCreateMany, noList, noGet, noSearch, noUpdate, noCount, noDelete, needAuth} = {}) => {

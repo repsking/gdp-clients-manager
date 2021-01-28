@@ -1,5 +1,6 @@
 const ValidationError = 'ValidationError';
 
+// Middleware to check all kind of errors which come from the API
 
 module.exports = (err, req, res, next) => {
     if(err) {

@@ -1,7 +1,7 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const ApiError = require('../Errors/ApiError');
+const ApiError = require('../errors/ApiError');
 require('dotenv').config();
 
 exports.login = async ({body: {username, password}}, res, next) => {
@@ -29,24 +29,14 @@ exports.login = async ({body: {username, password}}, res, next) => {
 
 };
 
-exports.newUser = async ({body}, res, next) => {
+exports.newUser = async ({currentUserId, body}, res, next) => {
 
     try {
         const password = await bcrypt.hash(body.password, 10);
-        const user = new User({...body, password});
+        const user = new User({...body, password, createdBy: currentUserId});
         await user.save();
         res.status(201).json({user});
     } catch (error) {
         next(error)
-    } 
-};
-
-exports.getUsers = async (req, res, next) => {
-
-    try {
-        const list = await User.find();
-        res.json(list);
-    } catch (error) {
-        next(error);
     } 
 };
