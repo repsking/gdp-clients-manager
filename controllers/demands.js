@@ -2,9 +2,11 @@ const Demands = require('../models/demands');
 const User = require('../models/user')
 const Status = require('../models/demandStatus')
 const ApiError = require('../Errors/ApiError')
+const ctrlWrapper = require("./utils/ctrlWrapper")
 
 exports.createDemand = async ({body}, res, next) => {
     try {
+        res.status(200).end();
         const statusId = await Status.findIdByCode('new');
         const result = new Demands({...body, handler: {status: statusId}});
         if(result) await result.save();
@@ -14,30 +16,73 @@ exports.createDemand = async ({body}, res, next) => {
     }
 }
 
-exports.addComment = async function({currentUserId, params, body}, res, next) {
+const serializeUser = ({email,phone, name,firstname, zipcode}) => {
+    return {email, phone, firstname, zipcode, name};
+}
+
+const serializeDevice = ({navigator,screen}) => {
+    return {navigator,screen};
+}
+
+const serializeProgramme = ({programmeName, programmeId, programmeVille,programmeGestionnaire, thematique}) => {
+    return {
+        name: programmeName,
+        id: programmeId,
+        ville: programmeVille,
+        gestionnaire: programmeGestionnaire,
+        thematique
+    }
+}
+
+const serializeDemand = (body, action) => {
+    const url = body.url || 'origin missing';
+    const origin = 'gdpcom';
+    return {
+        url,
+        action,
+        origin,
+        message: body.message,
+        user: serializeUser(body),
+        device: serializeDevice(body)
+    }
+}
+
+const serializeProgrammeDemand = body => {
+    return {
+        ...serializeDemand(body, "programme_form"),
+        programme: serializeProgramme(body)
+    }
+}
+
+const createDemand = async (demand) => {
+    const statusId = await Status.findIdByCode('new');
+    const doc = new Demands({...demand, handler: {status: statusId}});
+    const res = await doc.save();
+    return res;
+}
+
+exports.createCommonDemand = ctrlWrapper(async ({body}, res) => {
+    const doc = await createDemand(serializeDemand(body, "common_form"));
+    res.status(201).json(doc);
+})
+
+exports.createProgramDemand = ctrlWrapper(async ({body}, res) => {
+    const doc = await createDemand(serializeProgrammeDemand(body));
+    res.status(201).json(doc);
+})
+
+exports.addComment = async ({currentUserId, params, body}, res, next) => {
     try {
-        await Demands.updateOne({_id: params.id}, { 
-            $push: {comments: 
-                {
-                    text: body.comment ,
-                    personnal: body.personnal,
-                    owner: currentUserId 
-                } } })
+        await Demands.updateOne({_id: params.id}, { comment: { text: body.comment, owner: currentUserId} })
         res.status(200).end();
     } catch (error) {
         next(error);
     }
 };
 
-exports.removeComment = async function({currentUserId, params, body}, res, next) {
+exports.removeComment = async function({params}, res, next) {
     try {
-        const demand = await Demands.findOne({_id: params.id});
-        if(!demand.comments.find(comment => comment.id === body.commentId && comment.owner == currentUserId))
-            throw new ApiError("You're not allowed to edit or delete this comment", 401);
-        await Demands.updateOne({_id: params.id}, { 
-            $pull: {comments: {
-                    _id: body.commentId
-                } } })
+        await Demands.updateOne({_id: params.id}, { comment: null })
         res.status(200).end();
     } catch (error) {
         next(error);

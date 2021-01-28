@@ -4,7 +4,10 @@ const auth = require("./middlewares/auth");
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const demandStatusRouter = require('./routes/demandStatus')
+const rolesRouter = require('./routes/roles')
+const originsRouter = require('./routes/roles')
 const demandsRouter = require('./routes/demands');
+const errorMiddleware = require('./middlewares/errors')
 
 const {connectMongoDb} = require("./config/db");
 const mongoose = require("mongoose");
@@ -19,24 +22,17 @@ app.use(cors());
 app.use(json());
 
 app.use(`/${API_PREFIX}/users`, usersRouter);
+app.use(`/${API_PREFIX}/demands`,demandsRouter);
 app.use(auth);
 
 // Routes which need Authentification
 app.use(`/${API_PREFIX}`, indexRouter);
-app.use(`/${API_PREFIX}/demands`,demandsRouter);
 app.use(`/${API_PREFIX}/status`, demandStatusRouter)
+app.use(`/${API_PREFIX}/roles`, rolesRouter)
+app.use(`/${API_PREFIX}/origins`, originsRouter) 
 
 
 
-app.use((err, req, res, next) => {
-    if(err) {
-        if(!err.isHandled) console.log("Error Unhandled from App 'Error Middleware'",err);
-        const errObj = {
-            message:err.message || err,
-            status: err.status || 500
-        }
-        res.status(errObj.status).send(errObj);
-    }
-});
+app.use(errorMiddleware);
 
 module.exports = app;

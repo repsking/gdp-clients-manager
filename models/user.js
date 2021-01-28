@@ -1,25 +1,16 @@
-const mongoose = require('mongoose');
+const {Schema, model} = require('mongoose');
+const {requiredString} = require('./utils/customSchemaType')
 
-const SR ={
-    type: String,
-    required: true
-};
-
-const schemas = mongoose.Schema({
-    username: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    email: {
-        type: String,
-        required: true,
-    },
-    password: SR,
-    nom: {...SR},
-    prenom: {...SR},
+const schemas = Schema({
+    username: {...requiredString, unique: true},
+    email: requiredString,
+    password: requiredString,
+    nom: requiredString,
+    prenom: requiredString,
+    role: {
+        type: Schema.Types.ObjectId,
+        required: true
+    }
 })
 //userSchemas.index({nom:1, prenom:1,email:1 }, { text: true });
-
-
-module.exports = mongoose.model('User', schemas);
+module.exports = model('User', schemas);

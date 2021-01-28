@@ -1,12 +1,20 @@
 const {Schema, model} = require('mongoose');
 const {requiredString} = require('./utils/customSchemaType')
 
+const programmeSchemas = Schema({
+    name: String,
+    id: requiredString,
+    ville: String,
+    gestionnaire: String,
+    thematique: String 
+})
 const userSchemas = Schema({
 
-    nom: String,
-    prenom: String,
-    email: {...requiredString, unique: true},
-    phone: {...requiredString, unique: true}
+    name: String,
+    firstname: String,
+    email: requiredString,
+    phone: requiredString,
+    zipcode: String
 })
 
 const demandSchemas = Schema({
@@ -22,6 +30,15 @@ const demandSchemas = Schema({
         type: userSchemas,
         required: true
     },
+    device: {
+        navigator: {
+            type: Schema.Types.Mixed
+        },
+        screen: {
+            type: Schema.Types.Mixed
+        }
+    },
+    url: requiredString,
     handler: {
         userId: Schema.Types.ObjectId,
         status: {
@@ -29,17 +46,26 @@ const demandSchemas = Schema({
             ref: 'DemandStatus',
         },
     },
-    comments: [{
+    programme: {
+        type: programmeSchemas,
+        required: false,
+        default: undefined
+    },
+    comment: {
         text: String,
-        personnal: {
-            type: Boolean,
-            default: false,
-        },
         owner: {
             type: Schema.Types.ObjectId,
             ref: 'user'
-        } 
-    }]
+        }
+    }
 }, { timestamps: true })
 
+
+demandSchemas.index({
+    message: 'text',
+    'user.name': 'text',
+    'user.firstname': 'text',
+    'user.email': 'text',
+    'profile.something': 'text'
+});
 module.exports = model('Demand', demandSchemas);
