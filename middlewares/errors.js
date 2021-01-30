@@ -1,5 +1,5 @@
 const ValidationError = 'ValidationError';
-
+const BulkWriteError = 'BulkWriteError';
 // Middleware to check all kind of errors which come from the API
 
 module.exports = (err, req, res, next) => {
@@ -8,6 +8,11 @@ module.exports = (err, req, res, next) => {
             case ValidationError:
                 err.isHandled = true;
                 err.status = 422;
+                break;
+            case BulkWriteError:
+                console.log(err)
+                err.isHandled = true;
+                err.status = 400;
                 break;
         }
         if(!err.isHandled) console.log("Unhandled Error from App 'Error Middleware'", err);

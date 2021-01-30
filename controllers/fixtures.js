@@ -1,11 +1,11 @@
 const Origin = require('../models/origin');
 const Role = require('../models/role');
 const Status = require('../models/status');
-const ctrlWrapper = require('./utils/ctrlWrapper')
+const controller = require('./utils/controller')
 const {origins, roles, status} = require('../models/fixtures');
 
   
-exports.generate = ctrlWrapper(async (req,res) => {
+exports.generate = controller(async (req,res) => {
     await Promise.all([
         Origin.insertMany(origins),
         Role.insertMany(roles),

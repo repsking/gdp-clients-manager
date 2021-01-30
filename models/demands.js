@@ -12,8 +12,8 @@ const programmeSchemas = Schema({
 })
 const userSchemas = Schema({
 
-    name: nameType,
-    firstname: nameType,
+    name: String,
+    firstname: String,
     email: {
         ...requiredString,
         validate: emailValidator

@@ -8,7 +8,7 @@ exports.login = async ({body: {username, password}}, res, next) => {
     const errorMessage = "Username or password incorrect"
     try {
 
-        const user = await User.findOne({username});
+        const user = await User.findOne({username}, {password: true});
         if(!user) throw new ApiError(errorMessage, 401);
         const result = await bcrypt.compare(password, user.password);
         if(!result) {

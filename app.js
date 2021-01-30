@@ -1,3 +1,4 @@
+const morgan = require('morgan')
 const {connectMongoDb} = require("./config/db");
 const mongoose = require("mongoose");
 connectMongoDb();
@@ -34,7 +35,6 @@ app.use(`/${API_PREFIX}/status`, statusRouter)
 app.use(`/${API_PREFIX}/roles`, rolesRouter)
 app.use(`/${API_PREFIX}/origins`, originsRouter)
 app.use(`/${API_PREFIX}/fixtures`, fixturesRouter)
-
 app.use(require('./middlewares/errors'));
 
 module.exports = app;
