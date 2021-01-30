@@ -1,8 +1,10 @@
+const Origin = require('../models/Origin');
 const Demands = require('../models/demands');
 const User = require('../models/user')
 const Status = require('../models/status')
 const ApiError = require('../errors/ApiError')
 const controller = require("./utils/controller")
+const email = require("../emails/mailService");
 
 const serializeUser = ({email, phone, name, firstname, zipcode}) => ({
     email, phone, firstname, zipcode, name
@@ -34,11 +36,36 @@ const serializeProgrammeDemand = body => ({
     programme: serializeProgramme(body)
 })
 
-const createDemand = async (demand) => {
-    const statusId = await Status.findIdByCode('new');
+const sendResponseMail = async ({url, origin, action, messge, user, programme, createdAt: demandDate}) => {
+    
+    const client = {
+        from: `"${origin.name}" <foo@example.com>`, // sender address
+        to: user.email, // list of receivers
+        subject: "Demane bien prise en compte", // Subject line
+        html: `<b>Bonjour M.</br>C'est fait !`, // html body
+      };
+
+      const team = {
+        from: '"Le Guide du Patrimoine.com" <foo@example.com>', // sender address
+        to: user.email, // list of receivers
+        subject: "Une nouvelle demande vient d`être enregistré", // Subject line
+        html: `<b>Bonjour M. Saliou</br>C'est fait !`, // html body
+      };
+      try {
+        await Promise.all([email(client), email(team)]);
+        return true;
+      } catch(e) {
+          // Save a log which says that the demands gone but not the email and do not block the process
+        return false;
+      }
+}
+
+const createDemand = async (demand) => {    
+    const [originId = null, statusId] = await Promise.all([Origin.findIdByKeyword(demand.origin), Status.findIdByCode('new') ])
     if(!statusId) throw ApiError("status_not_defined", 400)
-    const doc = new Demands({...demand, handler: {status: statusId}});
+    const doc = new Demands({...demand, origin: originId, handler: {status: statusId}});
     const res = await doc.save();
+    sendResponseMail(res);
     return res;
 };
 

@@ -1,5 +1,5 @@
 const {Schema, model} = require('mongoose');
-const {requiredString, nameType} = require('./utils/customSchemaType')
+const {requiredString} = require('./utils/customSchemaType')
 const { emailValidator, phoneValidator } = require('./utils/validators');
 
 
@@ -28,7 +28,11 @@ const userSchemas = Schema({
 const demandSchemas = Schema({
     
     message: String,
-    origin: requiredString,
+    origin: {
+        type: Schema.Types.ObjectId,
+        ref: 'Origin',
+        autopopulate: true,
+    },
     action: requiredString,
     datas: {
         type: Schema.Types.Mixed,

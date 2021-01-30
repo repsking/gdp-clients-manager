@@ -1,4 +1,4 @@
-const Origin = require('../models/origin');
+/*const Origin = require('../models/origin');
 const Role = require('../models/role');
 const Status = require('../models/status');
 const controller = require('./utils/controller')
@@ -12,4 +12,4 @@ exports.generate = controller(async (req,res) => {
         Status.insertMany(status)
       ]);
     res.status(201).json({message: "All created"});
-  })
+  })*/

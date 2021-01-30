@@ -1,8 +1,8 @@
 const { Schema, model } = require("mongoose");
-const { requiredString, nameType } = require("./utils/customSchemaType");
+const { requiredString } = require("./utils/customSchemaType");
 const { emailValidator } = require('./utils/validators');
-console.log("HEy", nameType);
-const schemas = Schema({
+
+const userSchemas = Schema({
   username: { ...requiredString, unique: true },
   email: {
     ...requiredString,
@@ -23,5 +23,5 @@ const schemas = Schema({
     ref: "User",
   }
 });
-schemas.plugin(require("mongoose-autopopulate"));
-module.exports = model("User", schemas);
+userSchemas.plugin(require("mongoose-autopopulate"));
+module.exports = model("User", userSchemas);

@@ -7,9 +7,9 @@ const originSchemas = Schema({
     keywords: [String]
 })
 
-originSchemas.statics.findIdByName = async function(name) {
-    const $regex = new RegExp(name, 'i');
-    const res = await this.findOne({ name: { $regex } },{_id: 1});
-    return res._id;
+originSchemas.statics.findIdByKeyword = async function(word) {
+    const $regex = new RegExp(word, 'i');
+    const res = await this.findOne({ keywords: { $regex } });
+    return res && res._id;
   };
 module.exports = model('Origin', originSchemas);

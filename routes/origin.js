@@ -1,5 +1,5 @@
-const Origin = require('../models/origin')
+//const Origin = require('../models/origin')
 const generateCrud = require('./utils/generateCrud');
-const router = generateCrud(Origin);
+const router = generateCrud();
 
 module.exports = router;
