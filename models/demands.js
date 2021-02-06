@@ -1,6 +1,7 @@
 const {Schema, model} = require('mongoose');
 const {requiredString} = require('./utils/customSchemaType')
 const { emailValidator, phoneValidator } = require('./utils/validators');
+const { searchFieldFilter } = require('./utils/utils')
 
 
 const programmeSchemas = Schema({
@@ -19,8 +20,8 @@ const userSchemas = Schema({
         validate: emailValidator
     },
     phone: {
-        ...requiredString,
-        validate: phoneValidator
+        type: String,
+       //Put in comment cause we need to specify to not validate if value == null validate: phoneValidator
     },
     zipcode: String
 })
@@ -73,19 +74,15 @@ const demandSchemas = Schema({
         owner: {
             type: Schema.Types.ObjectId,
             ref: 'User',
-            autopopulate: true,
         }
     }
 }, { timestamps: true })
 
+const searchFields = ['message', 'user.name', 'user.firstname','user.email', 'user.phone'];
 
-demandSchemas.index({
-    message: 'text',
-    'user.name': 'text',
-    'user.firstname': 'text',
-    'user.email': 'text',
-    'profile.something': 'text'
-});
-
+demandSchemas.statics.excludeProjection = () => ['comment.owner.password', 'comment.owner.role', 'comment.owner.email'];
+demandSchemas.statics.fieldsSearchFilter = function(string) {
+    return searchFieldFilter(searchFields, string)
+  };
 demandSchemas.plugin(require('mongoose-autopopulate'));
 module.exports = model('Demand', demandSchemas);

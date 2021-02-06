@@ -3,8 +3,12 @@ const auth = require('../../middlewares/auth')
 const ApiError = require('../../errors/ApiError');
 const controller = require('../../controllers/utils/controller');
 
+const getExcludeProjection = (Collection) => Collection && Collection.excludeProjection && Collection.excludeProjection().reduce((filter, key) => ({...filter, [key]: 1}), {}) || {};
+
 module.exports = (Collection, {noCreate, noCreateMany, noList, noGet, noSearch, noUpdate, noCount, noDelete, needAuth} = {}) => {
 
+    const excludeProjection = getExcludeProjection(Collection);
+    console.log(excludeProjection)
     const create = controller(async ({body}, res) => {
         const result = new Collection({...body});
         if(result) await result.save();
@@ -18,13 +22,12 @@ module.exports = (Collection, {noCreate, noCreateMany, noList, noGet, noSearch, 
     });
 
     const list = controller(async ({query}, res) => {
-        console.log(query)
-        const result = await Collection.find(query);
+        const result = await Collection.find({}, excludeProjection);
         res.json(result);
     });
-
+    
     const search = controller(async ({params}, res) => {
-        const list = await Collection.find({$text: { $search: params.query }});
+        const list = await Collection.find({$text: { $search: params.query }}, excludeProjection);
         res.json(list);
     });
 
@@ -34,7 +37,7 @@ module.exports = (Collection, {noCreate, noCreateMany, noList, noGet, noSearch, 
     });
 
     const get = controller(async ({params: {id: _id}}, res) => {
-        const result = await Collection.findOne({_id});
+        const result = await Collection.findOne({_id}, excludeProjection);
         if(!result) throw ApiError('Ressource Not found', 404)
         res.json(result);
     });
