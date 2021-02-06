@@ -12,4 +12,10 @@ originSchemas.statics.findIdByKeyword = async function(word) {
     const res = await this.findOne({ keywords: { $regex } });
     return res && res._id;
   };
+
+  originSchemas.statics.findByKeyword = async function(word) {
+    const $regex = new RegExp(word, 'i');
+    const res = await this.findOne({ keywords: { $regex } });
+    return res
+  };
 module.exports = model('Origin', originSchemas);

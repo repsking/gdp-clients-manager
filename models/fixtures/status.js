@@ -29,4 +29,10 @@ module.exports = [
     color: "#AABBDD",
     stepIndex: 5
   },
+  {
+    label: "Importé",
+    code: "import",
+    color: "#AAeeBDD",
+    stepIndex: 6
+  },
 ];

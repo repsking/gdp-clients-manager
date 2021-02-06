@@ -6,7 +6,7 @@ const { searchFieldFilter } = require('./utils/utils')
 
 const programmeSchemas = Schema({
     name: String,
-    id: requiredString,
+    id: String,
     ville: String,
     gestionnaire: String,
     thematique: String 
@@ -34,10 +34,17 @@ const demandSchemas = Schema({
         ref: 'Origin',
         autopopulate: true,
     },
-    action: requiredString,
+    action: {
+        type: String,
+        default: 'no-action'
+    },
     datas: {
         type: Schema.Types.Mixed,
         required: false
+    },
+    remoteId: {
+        type: String,
+        default: undefined
     },
     user: {
         type: userSchemas,
@@ -51,7 +58,7 @@ const demandSchemas = Schema({
             type: Schema.Types.Mixed
         }
     },
-    url: requiredString,
+    url: String,
     handler: {
         userId: {
             type: Schema.Types.ObjectId,

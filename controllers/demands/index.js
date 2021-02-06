@@ -1,50 +1,15 @@
-const Origin = require("../models/Origin");
-const Demands = require("../models/demands");
-const User = require("../models/user");
-const Status = require("../models/status");
-const ApiError = require("../errors/ApiError");
-const controller = require("./utils/controller");
-const email = require("../emails/mailService");
-const paginatedController = require('./utils/paginatedController')
+const Origin = require("../../models/Origin");
+const Demands = require("../../models/demands");
+const User = require("../../models/user");
+const Status = require("../../models/status");
+const ApiError = require("../../errors/ApiError");
+const controller = require("../utils/controller");
+const email = require("../../emails/mailService");
+const paginatedController = require('../utils/paginatedController')
+const importDemands = require('./importDemands');
+const { serializeDemand, serializeProgrammeDemand } = require('./utils')
 
-
-const serializeUser = ({ email, phone, name, firstname, zipcode }) => ({
-    email,
-    phone,
-    firstname,
-    zipcode,
-    name,
-});
-
-const serializeDevice = ({ navigator, screen, lang }) => ({
-    navigator,
-    screen,
-    lang,
-});
-
-const serializeProgramme = ({ programmeName, programmeId, programmeVille, programmeGestionnaire, thematique }) => ({
-    name: programmeName,
-    id: programmeId,
-    ville: programmeVille,
-    gestionnaire: programmeGestionnaire,
-    thematique,
-});
-
-const serializeDemand = (body) => ({
-    url: body.url || "origin missing",
-    origin: "gdpcom",
-    action: body.action || "no-action-given",
-    message: body.message,
-    user: serializeUser(body),
-    device: serializeDevice(body),
-});
-
-const serializeProgrammeDemand = (body) => ({
-    ...serializeDemand(body),
-    message: body.message || "progamme_info",
-    programme: serializeProgramme(body)
-});
-
+exports.importDemands = importDemands;
 const sendResponseMail = async ({ url, origin, action, messge, user, programme, createdAt: demandDate }) => {
     const client = {
         from: `"${origin.name}" <foo@example.com>`, // sender address
@@ -86,7 +51,7 @@ exports.createCommonDemand = controller(async ({ body }, res) => {
 });
 
 exports.createBeContactedDemand = controller(async ({ body }, res) => {
-    await createDemand(serializeDemand({ ...body, message: "Want to be contacted" }));
+    await createDemand(serializeDemand({ ...body, message: "Auto: 'Ce prospect désire être recontacté.'" }));
     res.status(201).end();
 });
 
@@ -108,7 +73,7 @@ exports.removeComment = controller(async ({ params }, res) => {
 exports.assignToUser = controller(async ({ body: { userId }, params }, res) => {
     const userExist = await User.exists({ _id: userId });
     if (!userExist)
-        throw new ApiEzoomrror("Selected user doesn't exist or it's not allowed to handle a contact demand", 400);
+        throw new ApiError("Selected user doesn't exist or it's not allowed to handle a contact demand", 400);
     const statusId = await Status.findIdByCode("handled");
     await Demands.updateOne({ _id: params.id }, { handler: { userId, status: statusId } });
     res.status(200).end();
@@ -135,3 +100,5 @@ exports.paginatedList = controller(async ({query}, res) => {
     const result = await paginatedController(Demands, filter, sort, pagination);
     res.json(result);
 });
+
+
