@@ -3,7 +3,7 @@ ssh saliou@206.81.31.158 <<EOF
  cd ~/gdp-clients-manager
  git pull
  npm i
- sudo -u nodejs pm2 restart all
+ nodejs pm2 restart all
  exit
 EOF
 
