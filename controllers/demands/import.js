@@ -1,4 +1,4 @@
-const Origin = require("../../models/Origin");
+const Origin = require("../../models/origin");
 const Demand = require('../../models/demands')
 const Status = require('../../models/status')
 const { ApiError } = require("../../Errors");
