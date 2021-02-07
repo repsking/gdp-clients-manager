@@ -14,6 +14,11 @@ exports.ROLES = {
         name: "superadmin",
         value: 2048,
     },
+    reps: {
+        label: "Reps's",
+        name: "reps",
+        value: 4096,
+    },
     reader: {
         label: "reader",
         name: "reader",
