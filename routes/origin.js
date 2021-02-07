@@ -1,5 +1,5 @@
 //const Origin = require('../models/origin')
-const generateCrud = require('./utils/generateCrud');
-const router = generateCrud();
+const crud = require('./utils/crud');
+const router = crud();
 
 module.exports = router;

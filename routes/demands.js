@@ -1,9 +1,9 @@
 const Demands = require('../models/demands')
-const generateCrud = require('./utils/generateCrud');
+const crud = require('./utils/crud');
 const {authUser} = require('../middlewares/auth');
 const { ROLES } = require("../config/roles")
 const {addComment, assignToUser, removeComment, createProgramDemand, createCommonDemand, createBeContactedDemand, paginatedList, importDemands} = require('../controllers/demands');
-const router = generateCrud(Demands, {noCreate: true, noGet: true, needAuth: true, role: ROLES.reader });
+const router = crud(Demands, {noCreate: true, noGet: true, needAuth: true, role: ROLES.reader });
  
 router.get('/paginated', authUser, paginatedList)
 router.post('/common', createCommonDemand)

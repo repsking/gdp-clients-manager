@@ -1,5 +1,5 @@
 const Status = require('../models/status')
-const generateCrud = require('./utils/generateCrud');
-const router = generateCrud(Status);
+const crud = require('./utils/crud');
+const router = crud(Status);
 
 module.exports = router;

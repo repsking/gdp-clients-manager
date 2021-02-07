@@ -2,7 +2,7 @@ const Origin = require("../../models/Origin");
 const Demand = require('../../models/demands')
 const Status = require('../../models/status')
 const { ApiError } = require("../../Errors");
-const controller = require("../utils/controller");
+const {controller} = require("../utils/controller");
 const mysql = require('mysql');
 const { serializeProgramme, serializeDevice } = require("./utils");
 
