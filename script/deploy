@@ -2,7 +2,7 @@
 ssh saliou@207.154.247.121 <<EOF
  cd ~/gdp-clients-manager
  git pull
- npm install production
+ npm i
  pm2 restart all
  exit
 EOF
