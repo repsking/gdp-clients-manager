@@ -1,4 +1,4 @@
-const Origin = require("../../models/Origin");
+const Origin = require("../../models/origin");
 const Demands = require("../../models/demands");
 const User = require("../../models/user");
 const Status = require("../../models/status");
