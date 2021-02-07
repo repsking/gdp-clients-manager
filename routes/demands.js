@@ -11,5 +11,5 @@ router.post('/beContacted', createBeContactedDemand)
 router.post('/addComment/:id',auth, addComment)
 router.post('/removeComment/:id',auth, removeComment)
 router.post('/assignTo/:id', auth, assignToUser)
-router.post('/import',importDemands)
+router.post('/import', auth, importDemands)
 module.exports = router;

@@ -2,6 +2,11 @@ const jwt = require('jsonwebtoken');
 const ApiError = require('../errors/ApiError');
 
 
+
+/*const setUser = (req, res, next) => {
+  if(req.headers.userId)
+}*/
+
 // 498 HTTP CODE means that the token is expired. Generally, the front disconnect the user in this case.
 module.exports =  (req, res, next) => {
     try {
