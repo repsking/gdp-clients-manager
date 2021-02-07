@@ -1,4 +1,4 @@
-exports.serializeUser = ({ email, phone, name, firstname, zipcode }) => ({
+const serializeUser = ({ email, phone, name, firstname, zipcode }) => ({
     email,
     phone,
     firstname,
@@ -6,21 +6,20 @@ exports.serializeUser = ({ email, phone, name, firstname, zipcode }) => ({
     name,
 });
 
-exports.serializeDevice = ({ navigator, screen, lang }) => ({
+const serializeDevice = ({ navigator, screen, lang }) => ({
     navigator,
     screen,
     lang,
 });
 
-exports.serializeProgramme = ({ programmeName, programmeId, programmeVille, programmeGestionnaire, thematique,villeProduct, nomProduct, gestionnaireProduct, thematiqueProduct }) => ({
+const serializeProgramme = ({ programmeName, programmeId, programmeVille, programmeGestionnaire, thematique,villeProduct, nomProduct, gestionnaireProduct, thematiqueProduct }) => ({
     name: programmeName || nomProduct,
     id: programmeId,
     ville: programmeVille || villeProduct,
     gestionnaire: programmeGestionnaire || gestionnaireProduct,
     thematique: thematique || thematiqueProduct,
 });
-
-exports.serializeDemand = (body) => ({
+const serializeDemand = (body) => ({
     url: body.url || "origin missing",
     origin: body.origin || "gdpcom",
     action: body.action || "no-action-given",
@@ -28,6 +27,10 @@ exports.serializeDemand = (body) => ({
     user: serializeUser(body),
     device: serializeDevice(body),
 });
+exports.serializeDemand = serializeDemand;
+exports.serializeUser = serializeUser;
+exports.serializeDevice = serializeDevice
+exports.serializeProgramme = serializeProgramme 
 
 exports.serializeProgrammeDemand = (body) => ({
     ...serializeDemand(body),

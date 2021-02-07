@@ -1,6 +1,7 @@
 const { Schema, model } = require("mongoose");
 const { requiredString } = require("./utils/customSchemaType");
 const { emailValidator } = require('./utils/validators');
+const { ROLES } = require('../config/roles');
 
 const userSchemas = Schema({
   username: { ...requiredString, unique: true },
@@ -12,10 +13,9 @@ const userSchemas = Schema({
   nom: {...requiredString, required: true},
   prenom: {...requiredString, required: true},
   role: {
-    type: Schema.Types.ObjectId,
+    type: String,
     required: true,
-    autopopulate: true,
-    ref: "Role",
+    enum: Object.values(ROLES).map(({name}) => name)
   },
   createdBy: {
     required: true,

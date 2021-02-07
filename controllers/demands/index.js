@@ -2,7 +2,7 @@ const Origin = require("../../models/Origin");
 const Demands = require("../../models/demands");
 const User = require("../../models/user");
 const Status = require("../../models/status");
-const ApiError = require("../../errors/ApiError");
+const { ApiError } = require("../../Errors");
 const controller = require("../utils/controller");
 const email = require("../../emails/mailService");
 const paginatedController = require('../utils/paginatedController')
@@ -46,18 +46,18 @@ const createDemand = async (demand) => {
 };
 
 exports.createCommonDemand = controller(async ({ body }, res) => {
-    await createDemand(serializeDemand(body));
-    res.status(201).end();
+    const newDemand = await createDemand(serializeDemand(body));
+    res.status(201).json(newDemand);
 });
 
 exports.createBeContactedDemand = controller(async ({ body }, res) => {
-    await createDemand(serializeDemand({ ...body, message: "Auto: 'Ce prospect désire être recontacté.'" }));
-    res.status(201).end();
+    const newDemand = await createDemand(serializeDemand({ ...body, message: "Auto: 'Ce prospect désire être recontacté.'" }));
+    res.status(201).json(newDemand);
 });
 
 exports.createProgramDemand = controller(async ({ body }, res) => {
-    await createDemand(serializeProgrammeDemand({ ...body}));
-    res.status(201).end();
+    const newDemand = await createDemand(serializeProgrammeDemand({ ...body}));
+    res.status(201).json(newDemand);
 });
 
 exports.addComment = controller(async ({ currentUserId, params, body }, res) => {
@@ -100,5 +100,3 @@ exports.paginatedList = controller(async ({query}, res) => {
     const result = await paginatedController(Demands, filter, sort, pagination);
     res.json(result);
 });
-
-

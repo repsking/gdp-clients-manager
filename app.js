@@ -1,16 +1,11 @@
 const morgan = require('morgan')
 const {connectMongoDb} = require("./config/db");
+const {authUser} = require("./middlewares/auth")
 const mongoose = require("mongoose");
-connectMongoDb();
-mongoose.set("toJSON", { virtuals: true });
-
-const express = require('express');
-const app = express();
-
 const cors = require("cors");
 const { json } = require('body-parser');
-app.use(cors());
-app.use(json());
+const express = require('express');
+const app = express();
 
 // All App Routers
 const indexRouter = require('./routes/index');
@@ -21,16 +16,21 @@ const originsRouter = require('./routes/origin')
 const demandsRouter = require('./routes/demands');
 const fixturesRouter = require("./routes/fixtures")
 
-const API_PREFIX = 'api'
+connectMongoDb();
+mongoose.set("toJSON", { virtuals: true });
+
+app.use(cors());
+app.use(json());
+
+const API_PREFIX = 'api';
 
 // Opened Routes which doesn't need Authentification token
 app.use(`/${API_PREFIX}/users`, usersRouter);
 app.use(`/${API_PREFIX}/demands`,demandsRouter);
 
-app.use(require("./middlewares/auth"));
+app.use(authUser);
 
 // Routes which need Authentification
-app.use(`/${API_PREFIX}`, indexRouter);
 app.use(`/${API_PREFIX}/status`, statusRouter)
 app.use(`/${API_PREFIX}/roles`, rolesRouter)
 app.use(`/${API_PREFIX}/origins`, originsRouter)

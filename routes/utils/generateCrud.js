@@ -1,14 +1,13 @@
 const express = require('express');
-const auth = require('../../middlewares/auth')
-const ApiError = require('../../errors/ApiError');
+const { authUser, authRole } = require('../../middlewares/auth')
+const { ApiError } = require('../../Errors');
 const controller = require('../../controllers/utils/controller');
 
 const getExcludeProjection = (Collection) => Collection && Collection.excludeProjection && Collection.excludeProjection().reduce((filter, key) => ({...filter, [key]: 1}), {}) || {};
 
-module.exports = (Collection, {noCreate, noCreateMany, noList, noGet, noSearch, noUpdate, noCount, noDelete, needAuth} = {}) => {
+module.exports = (Collection, {noCreate, noCreateMany, noList, noGet, noSearch, noUpdate, noCount, noDelete, needAuth, needRole} = {}) => {
 
     const excludeProjection = getExcludeProjection(Collection);
-    console.log(excludeProjection)
     const create = controller(async ({body}, res) => {
         const result = new Collection({...body});
         if(result) await result.save();
@@ -54,7 +53,10 @@ module.exports = (Collection, {noCreate, noCreateMany, noList, noGet, noSearch, 
 
     const router = express.Router();
 
-    if(needAuth) router.use(auth);
+    if(needAuth) {
+        router.use(authUser);
+        if(needRole) router.use(authRole(needRole))
+    }
 
     !noList && router.get('/', list);
     !noCount && router.get('/count', count);

@@ -1,25 +1,44 @@
 const jwt = require('jsonwebtoken');
-const ApiError = require('../errors/ApiError');
+const { ForbiddenError, NotAuthorizedError, ApiError } = require('../Errors')
+const { TokenExpiredError } = require('../Errors/consts');
+const User = require('../models/user');
+const {ROLES} = require('../config/roles');
 
-
-
-/*const setUser = (req, res, next) => {
-  if(req.headers.userId)
-}*/
-
+const setUser = async userId => {
+  try {
+    if (!userId) throw false;
+    const user = await User.findById(userId, {_id: 1,email: 1, nom: 1, prenom: 1, role: 1});
+    if (!user) throw false;
+    return user;
+  } catch (e) {
+    throw new NotAuthorizedError();
+  }
+};
 // 498 HTTP CODE means that the token is expired. Generally, the front disconnect the user in this case.
-module.exports =  (req, res, next) => {
-    try {
-        const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
-        const decoded = jwt.verify(token, process.env.SECRET_AUTH_TOKEN);
-        const userId = decoded.userId;
-        if (req.headers.uuid && req.headers.uuid !== userId) throw ApiError('Invalid user ID', 498);
-        req.currentUserId = userId;
-        next()
-      } catch(error) {
-        if(error.name === 'TokenExpiredError') {
-          throw new ApiError("User token has expired. You'll be disconnected.", 498)
-        }
-        throw new ApiError("User not authorized to connect to this API", 401)
-      }
-    };
+exports.authUser = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
+    const { userId } = jwt.verify(token, process.env.SECRET_AUTH_TOKEN);
+    if (!userId || (req.headers.uuid && req.headers.uuid !== userId)) return next(new NotAuthorizedError());
+    const user = await setUser(req.headers.uuid);
+    req.user = user;
+    req.currentUserId = userId;
+    next();
+  } catch (e) {
+    if (e.name === TokenExpiredError) {
+      return next(new ApiError("User token has expired. You'll be disconnected.", 498));
+    }
+    next(new NotAuthorizedError());
+  }
+};
+
+exports.authRole = (role) => (req, res, next) => {
+  const userRole = Object.values(ROLES).find(({name}) => name === req.user.role)
+  console.log(req.user)
+  try {
+    if (userRole && role && role.value && userRole.value >= role.value) return next();
+    next(new ForbiddenError());
+  } catch (e) {
+    next(new ForbiddenError());
+  }
+}

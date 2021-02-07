@@ -1,43 +1,35 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const ApiError = require('../errors/ApiError');
+const { NotAuthorizedError } = require("../Errors");
+const controller = require('./utils/controller')
+const { roleConverter } = require('../config/roles');
 require('dotenv').config();
 
-exports.login = async ({body: {username, password}}, res, next) => {
-    const errorMessage = "Username or password incorrect"
-    try {
 
-        const user = await User.findOne({username}, {password: true, username: true, nom: true, prenom: true, role: true});
-        if(!user) throw new ApiError(errorMessage, 401);
-        const result = await bcrypt.compare(password, user.password);
-        if(!result) {
-            throw new ApiError(errorMessage, 401);
-        }
-        console.log(user);
-        res.json(
-            {
-                username: user.username,
-                nom: user.nom,
-                prenom: user.prenom,
-                userId: user._id,
-                token: jwt.sign({userId: user._id}, process.env.SECRET_AUTH_TOKEN, {expiresIn: "24h"})
-            });
-        
-    } catch (error) {
-        next(error);
-    }
+exports.login = controller(async ({body: {username, password}}, res) => {
+    const errorMsg = "Creditentials Incorrect";
+    
+    const user = await User.findOne({username}, {password: true, username: true, nom: true, prenom: true, role: true});
+    if(!user) throw new NotAuthorizedError(errorMsg);
+    
+    const result = await bcrypt.compare(password, user.password);
+    if(!result) throw new NotAuthorizedError(errorMsg);
+    
+    res.json(
+        {
+            username: user.username,
+            nom: user.nom,
+            prenom: user.prenom,
+            userId: user._id,
+            role: roleConverter(user.role),
+            token: jwt.sign({userId: user._id}, process.env.SECRET_AUTH_TOKEN, {expiresIn: "24h"})
+        });
+});
 
-};
-
-exports.newUser = async ({currentUserId, body}, res, next) => {
-
-    try {
-        const password = await bcrypt.hash(body.password, 10);
-        const user = new User({...body, password, createdBy: currentUserId});
-        await user.save();
-        res.status(201).json({user});
-    } catch (error) {
-        next(error)
-    } 
-};
+exports.newUser = controller(async ({user, body}, res) => {
+    const password = await bcrypt.hash(body.password, 30);
+    const newUser = new User({...body, password, createdBy: user._id});
+    await newUser.save();
+    res.status(201).json(newUser);
+});
