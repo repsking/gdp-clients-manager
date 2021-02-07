@@ -5,7 +5,7 @@ const controller = require('../../controllers/utils/controller');
 
 const getExcludeProjection = (Collection) => Collection && Collection.excludeProjection && Collection.excludeProjection().reduce((filter, key) => ({...filter, [key]: 1}), {}) || {};
 
-module.exports = (Collection, {noCreate, noCreateMany, noList, noGet, noSearch, noUpdate, noCount, noDelete, needAuth, needRole} = {}) => {
+module.exports = (Collection, {noCreate, noCreateMany, noList, noGet, noSearch, noUpdate, noCount, noDelete, needAuth, role} = {}) => {
 
     const excludeProjection = getExcludeProjection(Collection);
     const create = controller(async ({body}, res) => {
@@ -55,7 +55,7 @@ module.exports = (Collection, {noCreate, noCreateMany, noList, noGet, noSearch, 
 
     if(needAuth) {
         router.use(authUser);
-        if(needRole) router.use(authRole(needRole))
+        if(role) router.use(authRole(role))
     }
 
     !noList && router.get('/', list);
