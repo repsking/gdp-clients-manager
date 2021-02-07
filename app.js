@@ -8,7 +8,6 @@ const express = require('express');
 const app = express();
 
 // All App Routers
-const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const statusRouter = require('./routes/status')
 const rolesRouter = require('./routes/roles')

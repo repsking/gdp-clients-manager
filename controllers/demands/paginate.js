@@ -1,4 +1,7 @@
+const Demands = require("../../models/demands");
+const {controller, ACTION} = require("../utils/controller");
 const { cleanUndefined } = require('../../utils')
+
 
 /**
  * 
@@ -7,7 +10,7 @@ const { cleanUndefined } = require('../../utils')
  * @param {by: String, direction: String} sort 
  * @param {page: Number, limit: Number} pagination 
  */
-module.exports = async (Model, filter = {}, {by ='id', direction = 'asc'}, {page = 1 , limit = 10}) => {
+const paginatedController = async (Model, filter = {}, {by ='id', direction = 'asc'}, {page = 1 , limit = 10}) => {
     const currentPage = parseInt(page);
     const itemPerPage = parseInt(limit);
     let localFilter = {...filter};
@@ -38,3 +41,13 @@ module.exports = async (Model, filter = {}, {by ='id', direction = 'asc'}, {page
         },
     };
 };
+
+const serializeFilterQuery = ({search,status, origin, handler}) => ({search: search || undefined, status, origin, handler})
+const serializeSortQuery = ({sortBy, sortDesc}) => ({by: sortBy, direction: sortDesc && sortDesc == 'true' ? 'desc' : 'asc'})
+const serializePaginatedQuery = (query) => ({ sort: serializeSortQuery(query), filter: serializeFilterQuery(query), pagination: {page: query.page, limit: query.perPage}})
+
+
+module.exports = controller(async ({query}) => {
+    const {sort, filter, pagination} = serializePaginatedQuery(query);
+    return paginatedController(Demands, filter, sort, pagination);
+}, ACTION.RESULT);

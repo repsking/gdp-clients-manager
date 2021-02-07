@@ -5,11 +5,10 @@ const Status = require("../../models/status");
 const { ApiError } = require("../../Errors");
 const {controller, ACTION} = require("../utils/controller");
 const email = require("../../emails/mailService");
-const paginatedController = require('../utils/paginatedController')
-const importDemands = require('./importDemands');
+const importDemands = require('./import');
+const paginate = require('./paginate')
 const { serializeDemand, serializeProgrammeDemand } = require('./utils');
 
-exports.importDemands = importDemands;
 const sendResponseMail = async ({ url, origin, action, messge, user, programme, createdAt: demandDate }) => {
     const client = {
         from: `"${origin.name}" <foo@example.com>`, // sender address
@@ -38,12 +37,16 @@ const createDemand = async (demand) => {
         Origin.findIdByKeyword(demand.origin),
         Status.findIdByCode("new"),
     ]);
-    if (!statusId) throw ApiError("status_not_defined", 400);
+    if (!statusId) throw ApiError("status_not_defined", 500);
     const doc = new Demands({ ...demand, origin: originId, handler: { status: statusId } });
     const res = await doc.save();
     sendResponseMail(res);
     return res;
 };
+
+exports.paginatedList = paginate;
+
+exports.importDemands = importDemands;
 
 exports.createCommonDemand = controller(({ body }) => {
     return createDemand(serializeDemand(body));
@@ -67,8 +70,7 @@ exports.removeComment = controller(({ params }) => {
 
 exports.assignToUser = controller(async ({ body: { userId }, params }) => {
     const userExist = await User.exists({ _id: userId });
-    if (!userExist)
-        throw new ApiError("Selected user doesn't exist or it's not allowed to handle a contact demand", 400);
+    if (!userExist) throw new ApiError("Selected user doesn't exist", 400);
     const statusId = await Status.findIdByCode("handled");
     return Demands.updateOne({ _id: params.id }, { handler: { userId, status: statusId } });
 }, ACTION.INFORM);
@@ -78,16 +80,3 @@ exports.updateStatus = controller(async ({ body: { statusId }, params }) => {
     if (!statusExist) throw new ApiError("This status doesn't exist", 400);
     return Demands.updateOne({ _id: params.id }, { handler: { status: statusId } });
 },  ACTION.INFORM);
-
-exports.updateOrigin = controller(() => {
-    return Demands.updateMany({}, { origin: "6012657655cdfe39deceb96e" });
-},  ACTION.INFORM);
-
-const serializeFilterQuery = ({search,status, origin, handler}) => ({search: search || undefined, status, origin, handler})
-const serializeSortQuery = ({sortBy, sortDesc}) => ({by: sortBy, direction: sortDesc && sortDesc == 'true' ? 'desc' : 'asc'})
-const serializePaginatedQuery = (query) => ({ sort: serializeSortQuery(query), filter: serializeFilterQuery(query), pagination: {page: query.page, limit: query.perPage}})
-
-exports.paginatedList = controller(async ({query}) => {
-    const {sort, filter, pagination} = serializePaginatedQuery(query);
-    return paginatedController(Demands, filter, sort, pagination);
-}, ACTION.RESULT);
