@@ -7,7 +7,8 @@ const controller = require("../utils/controller");
 const email = require("../../emails/mailService");
 const paginatedController = require('../utils/paginatedController')
 const importDemands = require('./importDemands');
-const { serializeDemand, serializeProgrammeDemand } = require('./utils')
+const { serializeDemand, serializeProgrammeDemand } = require('./utils');
+const user = require("../../models/user");
 
 exports.importDemands = importDemands;
 const sendResponseMail = async ({ url, origin, action, messge, user, programme, createdAt: demandDate }) => {
@@ -60,8 +61,8 @@ exports.createProgramDemand = controller(async ({ body }, res) => {
     res.status(201).json(newDemand);
 });
 
-exports.addComment = controller(async ({ currentUserId, params, body }, res) => {
-    await Demands.updateOne({ _id: params.id }, { comment: { text: body.comment, owner: currentUserId } });
+exports.addComment = controller(async ({ user, params, body }, res) => {
+    await Demands.updateOne({ _id: params.id }, { comment: { text: body.comment, owner: user._id } });
     res.status(200).end();
 });
 

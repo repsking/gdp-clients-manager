@@ -22,7 +22,6 @@ exports.authUser = async (req, res, next) => {
     if (!userId || (req.headers.uuid && req.headers.uuid !== userId)) return next(new NotAuthorizedError());
     const user = await setUser(req.headers.uuid);
     req.user = user;
-    req.currentUserId = userId;
     next();
   } catch (e) {
     if (e.name === TokenExpiredError) {
@@ -34,7 +33,6 @@ exports.authUser = async (req, res, next) => {
 
 exports.authRole = (role) => (req, res, next) => {
   const userRole = Object.values(ROLES).find(({name}) => name === req.user.role)
-  console.log(req.user)
   try {
     if (userRole && role && role.value && userRole.value >= role.value) return next();
     next(new ForbiddenError());
