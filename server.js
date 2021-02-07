@@ -1,7 +1,7 @@
 const http = require ('http');
 const app = require('./app');
 
-const port = 3004
+const port = 3000
 app.set('port', port);
 
 const errorHandler = error => {
