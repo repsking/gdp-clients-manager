@@ -1,5 +1,10 @@
-const Role = require('../models/role')
-const generateCrud = require('./utils/generateCrud');
-const router = generateCrud(Role);
+const {ROLES} = require('../config/roles')
+const express = require('express');
+const router = express.Router();
+const { authUser, authRole } = require('../middlewares/auth')
+const controller = require('../controllers/utils/controller')
+
+const getRoles = controller((req, res) => res.json(ROLES))
+router.get('/',authUser, authRole(ROLES.superadmin), getRoles)
 
 module.exports = router;
