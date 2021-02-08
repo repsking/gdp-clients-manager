@@ -1,5 +1,5 @@
 #!/bin/sh
-ssh saliou@206.81.31.158 <<EOF
+ssh devops@serverjs.moondev <<EOF
  cd ~/gdp-clients-manager
  git pull
  npm i
