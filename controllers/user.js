@@ -1,11 +1,13 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { NotAuthorizedError } = require("../Errors");
+const { NotAuthorizedError, PasswordsDontMatch, WeakStrengthPassword, ApiError, ServerError } = require("../Errors");
 const {controller, ACTION} = require('./utils/controller')
 const { roleConverter } = require('../config/roles');
+
 require('dotenv').config();
 
+const checkPwdStrength = pwd => pwd;
 
 exports.login = controller(async ({body: {username, password}}) => {
     const errorMsg = "Creditentials Incorrect";
@@ -31,3 +33,18 @@ exports.newUser = controller(async ({user, body}) => {
     await newUser.save();
     return newUser
 }, ACTION.CREATE);
+
+exports.changePassword = controller(async ({user = {}, body}) => {
+    const { newPassword, oldPassword } = body;
+    if(!newPassword || !oldPassword ) throw new PasswordsDontMatch();
+
+    const userPwd = await User.findById(user._id, {password: 1});
+    if(!userPwd || !userPwd.password) throw new ServerError("Connected user informations are not findable");
+
+    const checkPwd = await bcrypt.compare(oldPassword, userPwd.password);
+    if(!checkPwd) throw new ApiError("The current password is not correct.")
+    if(!checkPwdStrength(newPassword)) throw new WeakStrengthPassword();
+    
+    const hashPwd = await bcrypt.hash(newPassword, 30);
+    return User.updateOne({_id: user._id, $set: { password: hashPwd }});
+}, ACTION.INFORM);
