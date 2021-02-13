@@ -1,7 +1,13 @@
 const http = require ('http');
 const app = require('./app');
 
-const port = 3004
+const getPort = () => {
+  const DEFAULT_PORT = 3000;
+  const envPort = process.env.PORT && parseInt(process.env.PORT);
+  return !isNaN(envPort) && envPort || DEFAULT_PORT;
+} 
+
+const port = getPort();
 app.set('port', port);
 
 const errorHandler = error => {
@@ -27,7 +33,7 @@ server.on('error', errorHandler);
 server.on('listening', () => {
   const address = server.address();
   const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
-  console.log('Listening on ' + bind);
+  console.log(`Server working on ${bind}`);
 });
 
 server.listen(port);

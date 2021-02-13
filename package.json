@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "DEBUG=myapp node server.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "bcrypt": "^5.0.0",
@@ -18,6 +18,7 @@
     "mongoose-autopopulate": "^0.12.3",
     "morgan": "^1.9.1",
     "mysql": "^2.18.1",
-    "nodemailer": "^6.4.17"
+    "nodemailer": "^6.4.17",
+    "xss": "^1.0.8"
   }
 }
