@@ -25,6 +25,13 @@ exports.ForbiddenError = class ForbiddenError extends ApiError {
     }
 }
 
+class NotFoundError extends ApiError {
+    constructor(message) {
+        super(message || 'Ressoure Not Found', 404);
+    }
+}
+exports.NotFoundError = (message) => new NotFoundError(message);
+
 exports.NotAuthorizedError = class NotAuthorizedError extends ApiError {
     constructor(message) {
         super(message || 'User Not authorized to access to this ressource', 401);
