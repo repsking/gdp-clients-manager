@@ -3,7 +3,10 @@ const {requiredString} = require('./utils/customSchemaType')
 
 const originSchemas = Schema({
     name: {...requiredString, unique: true},
-    url: requiredString,
+    url: {
+      ...requiredString,
+        unique: true
+    },
     keywords: [String]
 })
 

@@ -2,7 +2,10 @@ const {Schema, model} = require('mongoose');
 const {requiredString} = require('./utils/customSchemaType')
 
 const statusSchemas = Schema({
-    label: requiredString,
+    label: {
+        ...requiredString,
+        unique: true 
+    },
     code: requiredString,
     color: requiredString,
     stepIndex: {
