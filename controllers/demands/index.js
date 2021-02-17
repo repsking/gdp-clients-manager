@@ -1,4 +1,4 @@
-const Origin = require("../../models/Origin");
+const Origin = require("../../models/origin");
 const Demands = require("../../models/demands");
 const User = require("../../models/user");
 const Status = require("../../models/status");
@@ -6,12 +6,12 @@ const { ApiError } = require("../../Errors");
 const {controller, ACTION} = require("../utils/controller");
 const email = require("../../emails/mailService");
 const importDemands = require('./import');
-const paginate = require('./paginate')
+const {paginatedController} = require('../utils/paginate')
 const { serializeDemand, serializeProgrammeDemand } = require('./utils');
 
 const sendResponseMail = async ({ url, origin, action, messge, user, programme, createdAt: demandDate }) => {
     const client = {
-        from: `"${origin.name}" <foo@example.com>`, // sender address
+        from: `"${origin.name}" <contact@${origin.url}>`, // sender address
         to: user.email, // list of receivers
         subject: "Demane bien prise en compte", // Subject line
         html: `<b>Bonjour M.</br>C'est fait !`, // html body
@@ -44,7 +44,6 @@ const createDemand = async (demand) => {
     return res;
 };
 
-exports.paginatedList = paginate;
 
 exports.importDemands = importDemands;
 
@@ -80,3 +79,19 @@ exports.updateStatus = controller(async ({ body: { statusId }, params }) => {
     if (!statusExist) throw new ApiError("This status doesn't exist", 400);
     return Demands.updateOne({ _id: params.id }, { handler: { status: statusId } });
 },  ACTION.INFORM);
+
+const serializeFilterQuery = ({search,status, origin, handler}) => 
+({
+    search: search || undefined,
+    status,
+    origin,
+    // origin && { Model: Origin, filterValue: { origin: { url: origin, name: origin } }, field: 'origin' },
+    handler
+});
+
+const serializeSortQuery = ({sortBy, sortDesc}) => ({by: sortBy, direction: sortDesc && sortDesc == 'true' ? 'desc' : 'asc'})
+const serializePaginatedQuery = (query) => ({ sort: serializeSortQuery(query), filter: serializeFilterQuery(query), pagination: {page: query.page, limit: query.perPage}})
+exports.paginatedList = controller(({query}) => {
+    const {sort, filter, pagination} = serializePaginatedQuery(query);
+    return paginatedController(Demands, filter, sort, pagination);
+}, ACTION.RESULT);
