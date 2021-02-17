@@ -4,12 +4,14 @@ const User = require("../../models/user");
 const Status = require("../../models/status");
 const { ApiError } = require("../../Errors");
 const {controller, ACTION} = require("../utils/controller");
-const email = require("../../emails/mailService");
+const email = require("../../emails/service");
 const importDemands = require('./import');
 const {paginatedController} = require('../utils/paginate')
 const { serializeDemand, serializeProgrammeDemand } = require('./utils');
 
-const sendResponseMail = async ({ url, origin, action, messge, user, programme, createdAt: demandDate }) => {
+const sendResponseMail = async ({ url, origin, action, messge, user, programme, createdAt }) => {
+
+    // find team with mail
     const client = {
         from: `"${origin.name}" <contact@${origin.url}>`, // sender address
         to: user.email, // list of receivers
@@ -18,14 +20,14 @@ const sendResponseMail = async ({ url, origin, action, messge, user, programme, 
     };
 
     const team = {
-        from: '"Le Guide du Patrimoine.com" <foo@example.com>', // sender address
-        to: user.email, // list of receivers
-        subject: "Une nouvelle demande vient d`être enregistré", // Subject line
-        html: `<b>Bonjour M. Saliou</br>C'est fait !`, // html body
+        from: `"${origin.name}" <contact@${origin.url}>`, // sender address
+        to: 'saliou71@gmail.com', // list of receivers
+        subject: `Une nouvelle demande vient dêtre enregistré sur ${origin.name} `,
+        html: `<b>Bonjour M. Saliou</br>C'est fait !`,
     };
     try {
-        await Promise.all([email(client), email(team)]);
-        return true;
+        const [clientRes, teamRes] = await Promise.all([email(client), email(team)]);
+        return {clientRes, teamRes};
     } catch (e) {
         // Save a log which says that the demands gone but not the email and do not block the process
         return false;
