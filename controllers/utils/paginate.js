@@ -1,8 +1,20 @@
-const Demands = require("../../models/demands");
-const {controller, ACTION} = require("../utils/controller");
 const { cleanUndefined } = require('../../utils')
 
 
+const serializeRelation = async(filter) => {
+    const keys = Object.keys(filter);
+    const final = {};
+    console.log({filter})
+    for(const key of keys ) {
+        if(!keys[key]) continue;
+        const {populate, Model, filterValue, field} = keys[key];
+        if(Model && populate && filterValue, field){
+            const result = await Model.find(filterValue,{_id: true});
+            if (result && result._id) final[key] = {[field]: result._id};
+        }
+    }
+    return final;
+}
 /**
  * 
  * @param {*} Model 
@@ -10,10 +22,11 @@ const { cleanUndefined } = require('../../utils')
  * @param {by: String, direction: String} sort 
  * @param {page: Number, limit: Number} pagination 
  */
-const paginatedController = async (Model, filter = {}, {by ='id', direction = 'asc'}, {page = 1 , limit = 10}) => {
+exports.paginatedController = async (Model, filter = {}, {by ='id', direction = 'asc'}, {page = 1 , limit = 10}) => {
     const currentPage = parseInt(page);
     const itemPerPage = parseInt(limit);
-    let localFilter = {...filter};
+    let localFilter = await serializeRelation(filter);
+    console.log({localFilter});
     
     if(localFilter.search && Model.fieldsSearchFilter) {
         localFilter = {...localFilter, $or: Model.fieldsSearchFilter(filter.search)}
@@ -29,6 +42,7 @@ const paginatedController = async (Model, filter = {}, {by ='id', direction = 'a
     const meta = {};
     if (endIndex < totalItems) meta.next = currentPage + 1;
     if (startIndex > 0) meta.previous = currentPage - 1;
+    console.log({localFilter});
     const results = await Model.find(localFilter).limit(itemPerPage).skip(startIndex).sort({ [by]: direction }).exec();
     return {
         results,
@@ -42,12 +56,6 @@ const paginatedController = async (Model, filter = {}, {by ='id', direction = 'a
     };
 };
 
-const serializeFilterQuery = ({search,status, origin, handler}) => ({search: search || undefined, status, origin, handler})
-const serializeSortQuery = ({sortBy, sortDesc}) => ({by: sortBy, direction: sortDesc && sortDesc == 'true' ? 'desc' : 'asc'})
-const serializePaginatedQuery = (query) => ({ sort: serializeSortQuery(query), filter: serializeFilterQuery(query), pagination: {page: query.page, limit: query.perPage}})
 
 
-module.exports = controller(async ({query}) => {
-    const {sort, filter, pagination} = serializePaginatedQuery(query);
-    return paginatedController(Demands, filter, sort, pagination);
-}, ACTION.RESULT);
+
