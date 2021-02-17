@@ -17,12 +17,18 @@ exports.getConnection = async () => {
 });
 }
 
-
+const dbUrl = (type = 'online') => {
+  switch (type) {
+    case 'local':
+      return `mongodb://${process.env.MONGO_DB_USERNAME}:${process.env.MONGO_DB_PWD}@localhost:27017/${process.env.MONGO_DB_NAME}?authSource=admin`
+    case 'online':
+      return process.env.DB_AUTH_URL
+  }
+} 
 exports.connectMongoDb = async () => {
   try {
     await mongoose
-    .connect(
-      process.env.DB_AUTH_URL,
+    .connect(dbUrl('online'),
       { useNewUrlParser: true, useUnifiedTopology: true }
     )
     console.log("Mongo Databse connected");
