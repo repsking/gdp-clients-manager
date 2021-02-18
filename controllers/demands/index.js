@@ -9,6 +9,13 @@ const importDemands = require('./import');
 const {paginatedController} = require('../utils/paginate')
 const { serializeDemand, serializeProgrammeDemand } = require('./utils');
 
+const mailTemplate = (action, type) => {
+    if(!['Client', 'Team'].includes(type)) return;
+    // Pour le moment on retourne une concaténation mais a terme les actions seront en dur
+
+    return `${action}${type}`;
+
+};
 const sendResponseMail = async ({ url, origin, action, messge, user, programme, createdAt }) => {
 
     const originSerialized = { url: origin.url, name: origin.name }
@@ -17,7 +24,7 @@ const sendResponseMail = async ({ url, origin, action, messge, user, programme, 
             from: `"${origin.name}" <contact@${origin.url}>`,
             to: user.email, // list of receivers
         },
-        template: 'beContactedClient',
+        template: mailTemplate('beContacted','Client'),
         datas: {
             origin: originSerialized
         }
@@ -28,7 +35,7 @@ const sendResponseMail = async ({ url, origin, action, messge, user, programme, 
             from: `"${origin.name}" <contact@${origin.url}>`,
             to: 'saliou71@gmail.com', // list of receivers
         },
-        template: 'beContactedTeam',
+        template: mailTemplate('beContacted','Team'),
         datas: {
             origin: originSerialized,
             url,
