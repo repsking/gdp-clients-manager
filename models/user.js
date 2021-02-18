@@ -13,9 +13,13 @@ const userSchemas = Schema({
   nom: {...requiredString, required: true},
   prenom: {...requiredString, required: true},
   role: {
-    type: String,
+    type: Number,
     required: true,
-    enum: Object.values(ROLES).map(({name}) => name)
+    enum: Object.values(ROLES).map(({value}) => value)
+  },
+  inMailList: {
+    type: Boolean,
+    default: false
   },
   createdBy: {
     required: true,
@@ -23,5 +27,10 @@ const userSchemas = Schema({
     ref: "User",
   }
 });
+
+userSchemas.statics.getMailListUser = async function() {
+  const res = await this.find({ $or: [  {inMailList: true}, {role: { $gte: ROLES.admin.value}}  ] }, {email: true, prenom: true, nom: true});
+  return res;
+};
 userSchemas.plugin(require("mongoose-autopopulate"));
 module.exports = model("User", userSchemas);
