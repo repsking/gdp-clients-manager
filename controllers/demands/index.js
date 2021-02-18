@@ -11,22 +11,37 @@ const { serializeDemand, serializeProgrammeDemand } = require('./utils');
 
 const sendResponseMail = async ({ url, origin, action, messge, user, programme, createdAt }) => {
 
-    // find team with mail
-    const client = {
-        from: `"${origin.name}" <contact@${origin.url}>`, // sender address
-        to: user.email, // list of receivers
-        subject: "Demane bien prise en compte", // Subject line
-        html: `<b>Bonjour M.</br>C'est fait !`, // html body
+    const originSerialized = { url: origin.url, name: origin.name }
+    const clientOptions = {
+        message: {
+            from: `"${origin.name}" <contact@${origin.url}>`,
+            to: user.email, // list of receivers
+        },
+        template: 'beContactedClient',
+        datas: {
+            origin: originSerialized
+        }
     };
 
-    const team = {
-        from: `"${origin.name}" <contact@${origin.url}>`, // sender address
-        to: 'saliou71@gmail.com', // list of receivers
-        subject: `Une nouvelle demande vient dêtre enregistré sur ${origin.name} `,
-        html: `<b>Bonjour M. Saliou</br>C'est fait !`,
+    const teamOptions = {
+        message: {
+            from: `"${origin.name}" <contact@${origin.url}>`,
+            to: 'saliou71@gmail.com', // list of receivers
+        },
+        template: 'beContactedTeam',
+        datas: {
+            origin: originSerialized,
+            url,
+            createdAt,
+            user : {
+                phone: user.phone,
+                email: user.email,
+                name: user.name
+            }
+        }
     };
     try {
-        const [clientRes, teamRes] = await Promise.all([email(client), email(team)]);
+        const [clientRes, teamRes] = await Promise.all([email(clientOptions), email(teamOptions)]);
         return {clientRes, teamRes};
     } catch (e) {
         // Save a log which says that the demands gone but not the email and do not block the process

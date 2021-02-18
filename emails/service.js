@@ -1,13 +1,13 @@
 const nodemailer = require('nodemailer');
-
-// async..await is not allowed in global scope, must use a wrapper
-module.exports = async function (option) {
-  // Generate test SMTP service account from ethereal.email
-  // Only needed if you don't have a real mail account for testing
+const Email = require('email-templates');
+const Handlebars = require('handlebars')
+const {allowInsecurePrototypeAccess} = require('@handlebars/allow-prototype-access')
+const insecureHandlebars = allowInsecurePrototypeAccess(Handlebars)
+const getTransporter = async () => {
   const testAccount = await nodemailer.createTestAccount();
 
   // create reusable transporter object using the default SMTP transport
-  const transporter = nodemailer.createTransport({
+  return nodemailer.createTransport({
     host: "smtp.ethereal.email",
     port: 587,
     secure: false, // true for 465, false for other ports
@@ -16,16 +16,35 @@ module.exports = async function (option) {
       pass: testAccount.pass, // generated ethereal password
     },
   });
+}
 
-  // send mail with defined transport object
-  const info = await transporter.sendMail(option);
 
-  // Preview only available when sending through an Ethereal account
-  console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-  // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+module.exports = async function ({ message: {to, from}, template, datas = {} }) {
 
-  return nodemailer.getTestMessageUrl(info);
-
+  const transport = await getTransporter();
+  const email = new Email({ transport, views: {
+    options: {
+      extension: 'hbs'
+    }
+  } });
+  try {
+    const res = await email
+    .send({
+      template,
+      message: { to, from },
+      locals: datas
+    });
+    return res;
+    
+  } catch (error) {
+    console.log({error})
+  }
   
+
+
+
+
+
+  return res;
 }
 

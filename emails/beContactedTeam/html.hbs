@@ -1,0 +1,18 @@
+<html>
+
+<head>
+    <title> Un prospect demande à être rappelé | {{origin.name}} </title>
+</head>
+
+<body>
+    <p style="font-family:helvetica;border-bottom:2px #ccc solid;font-size:24px;padding-bottom:5px">{{  origin.name }}
+    </p>
+    <p style="font-family: helvetica;margin-bottom: 0px">Bonjour,<br>
+        <strong>{{ user.name }}</strong> souhaite être rappelé au <strong> {{ user.phone }} </strong> :</p>
+    <p>Contact Email : {{ user.email }}</p>
+    <p>Origin url : {{ url }}</p>
+    <p>Adresse Ip : ' . get_ip() . '</p>
+    <p>Date : {{ createdAt }}</p>
+</body>
+
+</html>
