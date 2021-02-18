@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { NotAuthorizedError, PasswordsDontMatch, WeakStrengthPassword, ApiError, ServerError } = require("../Errors");
 const {controller, ACTION} = require('./utils/controller')
-const { roleConverter } = require('../config/roles');
+const { serializeRole, deserializeRole } = require('../config/roles');
 
 require('dotenv').config();
 
@@ -22,16 +22,21 @@ exports.login = controller(async ({body: {username, password}}) => {
             nom: user.nom,
             prenom: user.prenom,
             userId: user._id,
-            role: roleConverter(user.role),
+            role: serializeRole(user.role),
             token: jwt.sign({userId: user._id}, process.env.SECRET_AUTH_TOKEN, {expiresIn: "24h"})
         };
 }, ACTION.RESULT);
 
 exports.newUser = controller(async ({user, body}) => {
-    const password = await bcrypt.hash(body.password, 30);
-    const newUser = new User({...body, password, createdBy: user._id});
+    let {email, prenom, nom, username, role, inMailList = false} = body;
+
+    role = deserializeRole(role);
+    //TODO: Change this tmp password by a function that will generate a random string 
+    const tmpPass = '1234test';
+    const newUser = new User({email, prenom, nom, username, role, inMailList, password: tmpPass, createdBy: user._id})
+    newUser.password = await bcrypt.hash(tmpPass, 10);
     await newUser.save();
-    return newUser
+    return {email,prenom, nom, username, role, tmpPwd: tmpPass};
 }, ACTION.CREATE);
 
 exports.changePassword = controller(async ({user = {}, body}) => {

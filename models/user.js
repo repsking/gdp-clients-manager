@@ -9,6 +9,7 @@ const userSchemas = Schema({
   email: {
     ...requiredString,
     validate: emailValidator,
+    unique: true
     },
   password: { ...requiredString, select: false },
   nom: {...requiredString, required: true},

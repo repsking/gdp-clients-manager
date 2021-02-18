@@ -38,6 +38,8 @@ module.exports = (Collection, {noCreate, noCreateMany, noList, noGet, noSearch, 
     const remove = controller(({params: {id: _id}}) => Collection.deleteOne({_id}) , ACTION.INFORM);
 
     const router = express.Router();
+
+    //FIXME: Remove the global middleware from the router and app it specificly in the route below
     if(needAuth) {
         router.use(authUser);
         if(role) router.use(authRole(role))

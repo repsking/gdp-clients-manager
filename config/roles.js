@@ -25,4 +25,5 @@ exports.ROLES = {
         value: 64,
     }}
 
-    exports.roleConverter = role => role;
+    exports.serializeRole = role => role;
+    exports.deserializeRole = role => role;
