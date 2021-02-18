@@ -11,7 +11,7 @@
         <strong>{{ user.name }}</strong> souhaite être rappelé au <strong> {{ user.phone }} </strong> :</p>
     <p>Contact Email : {{ user.email }}</p>
     <p>Origin url : {{ url }}</p>
-    <p>Adresse Ip : ' . get_ip() . '</p>
+    <p>Adresse Ip : {{ clientIp }} </p>
     <p>Date : {{ createdAt }}</p>
 </body>
 

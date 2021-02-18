@@ -1,8 +1,11 @@
 const nodemailer = require('nodemailer');
 const Email = require('email-templates');
 const Handlebars = require('handlebars')
+//FIXME: Remove it from package.json with an uninstall then remove this line
 const {allowInsecurePrototypeAccess} = require('@handlebars/allow-prototype-access')
-const insecureHandlebars = allowInsecurePrototypeAccess(Handlebars)
+
+const internalIp = require('internal-ip');
+
 const getTransporter = async () => {
   const testAccount = await nodemailer.createTestAccount();
 
@@ -18,10 +21,11 @@ const getTransporter = async () => {
   });
 }
 
-
 module.exports = async function ({ message: {to, from}, template, datas = {} }) {
 
   const transport = await getTransporter();
+  const clientIp = await internalIp.v4();
+
   const email = new Email({ transport, views: {
     options: {
       extension: 'hbs'
@@ -32,12 +36,15 @@ module.exports = async function ({ message: {to, from}, template, datas = {} }) 
     .send({
       template,
       message: { to, from },
-      locals: datas
+      locals: {
+        ...datas,
+        clientIp
+      },
     });
     return res;
     
   } catch (error) {
-    console.log({error})
+    console.log({error});
   }
   
 
