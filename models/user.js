@@ -2,6 +2,7 @@ const { Schema, model } = require("mongoose");
 const { requiredString } = require("./utils/customSchemaType");
 const { emailValidator } = require('./utils/validators');
 const { ROLES } = require('../config/roles');
+const { isNotEmpty } = require('../utils/array')
 
 const userSchemas = Schema({
   username: { ...requiredString, unique: true },
@@ -27,10 +28,11 @@ const userSchemas = Schema({
     ref: "User",
   }
 });
-
-userSchemas.statics.getMailListUser = async function() {
+    
+userSchemas.statics.getTeamEmails = async function() {
+  const DEFAULT_USER = {name: 'Default user', address:'saliou71@gmail.com'};
   const res = await this.find({ $or: [  {inMailList: true}, {role: { $gte: ROLES.admin.value}}  ] }, {email: true, prenom: true, nom: true});
-  return res;
+  return isNotEmpty(res) && res.map(user => ({name: `${user.prenom} ${user.nom}`, address: `${user.email}`})) || [DEFAULT_USER];
 };
 userSchemas.plugin(require("mongoose-autopopulate"));
 module.exports = model("User", userSchemas);

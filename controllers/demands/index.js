@@ -12,9 +12,7 @@ const { serializeDemand, serializeProgrammeDemand } = require('./utils');
 const mailTemplate = (action, type) => {
     if(!['Client', 'Team'].includes(type)) return;
     // Pour le moment on retourne une concaténation mais a terme les actions seront en dur
-
     return `${action}${type}`;
-
 };
 const sendResponseMail = async ({ url, origin, action, messge, user, programme, createdAt }) => {
 
@@ -29,11 +27,13 @@ const sendResponseMail = async ({ url, origin, action, messge, user, programme, 
             origin: originSerialized
         }
     };
-
+    
+    // list of receivers
+    const teamEmails = await User.getTeamEmails();
     const teamOptions = {
         message: {
             from: `"${origin.name}" <contact@${origin.url}>`,
-            to: 'saliou71@gmail.com', // list of receivers
+            to: teamEmails, 
         },
         template: mailTemplate('beContacted','Team'),
         datas: {
