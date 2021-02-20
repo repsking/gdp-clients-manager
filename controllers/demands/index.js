@@ -3,55 +3,60 @@ const Demands = require("../../models/demands");
 const User = require("../../models/user");
 const Status = require("../../models/status");
 const { ApiError } = require("../../Errors");
-const {controller, ACTION} = require("../utils/controller");
+const { controller, ACTION } = require("../utils/controller");
 const email = require("../../emails/service");
 const importDemands = require('./import');
-const {paginatedController} = require('../utils/paginate')
+const { paginatedController } = require('../utils/paginate')
 const { serializeDemand, serializeProgrammeDemand } = require('./utils');
+const { getAction } = require('../../config/actions')
 
 const mailTemplate = (action, type) => {
-    if(!['Client', 'Team'].includes(type)) return;
+    if (!['Client', 'Team'].includes(type)) return;
     // Pour le moment on retourne une concaténation mais a terme les actions seront en dur
     return `${action}${type}`;
 };
 const sendResponseMail = async ({ url, origin, action, messge, user, programme, createdAt }) => {
-
-    const originSerialized = { url: origin.url, name: origin.name }
-    const clientOptions = {
-        message: {
-            from: `"${origin.name}" <contact@${origin.url}>`,
-            to: user.email, // list of receivers
-        },
-        template: mailTemplate('beContacted','Client'),
-        datas: {
-            origin: originSerialized
-        }
-    };
-    
-    // list of receivers
-    const teamEmails = await User.getTeamEmails();
-    const teamOptions = {
-        message: {
-            from: `"${origin.name}" <contact@${origin.url}>`,
-            to: teamEmails, 
-        },
-        template: mailTemplate('beContacted','Team'),
-        datas: {
-            origin: originSerialized,
-            url,
-            createdAt,
-            user : {
-                phone: user.phone,
-                email: user.email,
-                name: user.name
-            }
-        }
-    };
     try {
+        const originSerialized = { url: origin.url, name: origin.name }
+        const actObj = getAction(action);
+        if (!actObj) throw new ApiError(`action is undefined or doesn't exit`)
+
+        const clientOptions = {
+            message: {
+                from: `"${origin.name}" <contact@${origin.url}>`,
+                to: user.email, // list of receivers
+            },
+            template: mailTemplate(actObj.name, 'Client'),
+            datas: {
+                origin: originSerialized
+            }
+        };
+
+        // list of receivers
+        const teamEmails = await User.getTeamEmails();
+        const teamOptions = {
+            message: {
+                from: `"${origin.name}" <contact@${origin.url}>`,
+                to: teamEmails,
+            },
+            template: mailTemplate(actObj.name, 'Team'),
+            datas: {
+                origin: originSerialized,
+                url,
+                createdAt,
+                user: {
+                    phone: user.phone,
+                    email: user.email,
+                    name: user.name
+                }
+            }
+        };
+
         const [clientRes, teamRes] = await Promise.all([email(clientOptions), email(teamOptions)]);
-        return {clientRes, teamRes};
+        return { clientRes, teamRes };
     } catch (e) {
         // Save a log which says that the demands gone but not the email and do not block the process
+        console.error("\x1b[36m",'Error from Send Mail : ', e.message || e)
         return false;
     }
 };
@@ -80,7 +85,7 @@ exports.createBeContactedDemand = controller(({ body }) => {
 }, ACTION.CREATE);
 
 exports.createProgramDemand = controller(({ body }) => {
-    return createDemand(serializeProgrammeDemand({ ...body}));
+    return createDemand(serializeProgrammeDemand({ ...body }));
 }, ACTION.CREATE);
 
 exports.addComment = controller(({ user, params, body }) => {
@@ -102,20 +107,20 @@ exports.updateStatus = controller(async ({ body: { statusId }, params }) => {
     const statusExist = await Status.exists({ _id: statusId });
     if (!statusExist) throw new ApiError("This status doesn't exist", 400);
     return Demands.updateOne({ _id: params.id }, { handler: { status: statusId } });
-},  ACTION.INFORM);
+}, ACTION.INFORM);
 
-const serializeFilterQuery = ({search,status, origin, handler}) => 
-({
-    search: search || undefined,
-    status,
-    origin,
-    // origin && { Model: Origin, filterValue: { origin: { url: origin, name: origin } }, field: 'origin' },
-    handler
-});
+const serializeFilterQuery = ({ search, status, origin, handler }) =>
+    ({
+        search: search || undefined,
+        status,
+        origin,
+        // origin && { Model: Origin, filterValue: { origin: { url: origin, name: origin } }, field: 'origin' },
+        handler
+    });
 
-const serializeSortQuery = ({sortBy, sortDesc}) => ({by: sortBy, direction: sortDesc && sortDesc == 'true' ? 'desc' : 'asc'})
-const serializePaginatedQuery = (query) => ({ sort: serializeSortQuery(query), filter: serializeFilterQuery(query), pagination: {page: query.page, limit: query.perPage}})
-exports.paginatedList = controller(({query}) => {
-    const {sort, filter, pagination} = serializePaginatedQuery(query);
+const serializeSortQuery = ({ sortBy, sortDesc }) => ({ by: sortBy, direction: sortDesc && sortDesc == 'true' ? 'desc' : 'asc' })
+const serializePaginatedQuery = (query) => ({ sort: serializeSortQuery(query), filter: serializeFilterQuery(query), pagination: { page: query.page, limit: query.perPage } })
+exports.paginatedList = controller(({ query }) => {
+    const { sort, filter, pagination } = serializePaginatedQuery(query);
     return paginatedController(Demands, filter, sort, pagination);
 }, ACTION.RESULT);
