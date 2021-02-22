@@ -1,0 +1,33 @@
+<html>
+<head>
+    <title> Demande de contact {{origine.name}} </title>
+</head>
+
+<body>
+    <p style="font-family:helvetica;border-bottom:2px #ccc solid;font-size:24px;padding-bottom:5px">{{ origine.name }}</p>
+
+    foreach ($client as $key => $value) {
+    if ($key != "message") {
+    $result .= '<p style="margin:2px 0px;font-family: helvetica;font-size: 15px;">' . ucfirst($key) . ' : ' .
+        (isset($value) && $value != "" ? $value : "Non renseigné") . '</p>';
+    }
+    }
+    <p>Nom: {{ user.nom }} </p>
+    <p>Prenom: {{ user.prenom }}</p>
+    <p>Téléphone: {{ user.phone }}</p>
+    <p>Email: {{ user.email }}</p>
+    <br>
+
+    <p style="font-family: helvetica;margin-tohangp: 6px">
+    {{#if message}}
+        <p style="font-family: helvetica;margin-bottom: 0px">Message envoyé :</p>
+        {{ message }}
+    {{/if}}
+    <br>
+    <p>Origin URl : {{ url }}</p>
+    <p>Adresse Ip: {{ clientIp }} </p>
+    <p>Date: {{ createdAt }}  </p>
+
+</body>
+
+</html>

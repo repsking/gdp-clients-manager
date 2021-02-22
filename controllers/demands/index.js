@@ -15,7 +15,7 @@ const mailTemplate = (action, type) => {
     // Pour le moment on retourne une concaténation mais a terme les actions seront en dur
     return `${action}${type}`;
 };
-const sendResponseMail = async ({ url, origin, action, messge, user, programme, createdAt }) => {
+const sendResponseMail = async({ url, origin, action, message, user, programme, createdAt }) => {
     try {
         const originSerialized = { url: origin.url, name: origin.name }
         const actObj = getAction(action);
@@ -44,10 +44,12 @@ const sendResponseMail = async ({ url, origin, action, messge, user, programme, 
                 origin: originSerialized,
                 url,
                 createdAt,
+                message,
                 user: {
                     phone: user.phone,
                     email: user.email,
-                    name: user.name
+                    name: user.name,
+                    firstname: user.firstname
                 }
             }
         };
@@ -56,18 +58,18 @@ const sendResponseMail = async ({ url, origin, action, messge, user, programme, 
         return { clientRes, teamRes };
     } catch (e) {
         // Save a log which says that the demands gone but not the email and do not block the process
-        console.error("\x1b[36m",'Error from Send Mail : ', e.message || e)
+        console.error("\x1b[36m", 'Error from Send Mail : ', e.message || e)
         return false;
     }
 };
 
-const createDemand = async (demand) => {
+const createDemand = async(demand) => {
     const [originId = null, statusId] = await Promise.all([
         Origin.findIdByKeyword(demand.origin),
         Status.findIdByCode("new"),
     ]);
     if (!statusId) throw ApiError("status_not_defined", 500);
-    const doc = new Demands({ ...demand, origin: originId, handler: { status: statusId } });
+    const doc = new Demands({...demand, origin: originId, handler: { status: statusId } });
     const res = await doc.save();
     sendResponseMail(res);
     return res;
@@ -81,11 +83,11 @@ exports.createCommonDemand = controller(({ body }) => {
 }, ACTION.CREATE);
 
 exports.createBeContactedDemand = controller(({ body }) => {
-    return createDemand(serializeDemand({ ...body, message: "Auto: 'Ce prospect désire être recontacté.'" }));
+    return createDemand(serializeDemand({...body, message: "Auto: 'Ce prospect désire être recontacté.'" }));
 }, ACTION.CREATE);
 
 exports.createProgramDemand = controller(({ body }) => {
-    return createDemand(serializeProgrammeDemand({ ...body }));
+    return createDemand(serializeProgrammeDemand({...body }));
 }, ACTION.CREATE);
 
 exports.addComment = controller(({ user, params, body }) => {
@@ -96,14 +98,14 @@ exports.removeComment = controller(({ params }) => {
     return Demands.updateOne({ _id: params.id }, { comment: null });
 }, ACTION.INFORM);
 
-exports.assignToUser = controller(async ({ body: { userId }, params }) => {
+exports.assignToUser = controller(async({ body: { userId }, params }) => {
     const userExist = await User.exists({ _id: userId });
     if (!userExist) throw new ApiError("Selected user doesn't exist", 400);
     const statusId = await Status.findIdByCode("handled");
     return Demands.updateOne({ _id: params.id }, { handler: { userId, status: statusId } });
 }, ACTION.INFORM);
 
-exports.updateStatus = controller(async ({ body: { statusId }, params }) => {
+exports.updateStatus = controller(async({ body: { statusId }, params }) => {
     const statusExist = await Status.exists({ _id: statusId });
     if (!statusExist) throw new ApiError("This status doesn't exist", 400);
     return Demands.updateOne({ _id: params.id }, { handler: { status: statusId } });
