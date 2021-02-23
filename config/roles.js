@@ -1,4 +1,4 @@
-exports.ROLES = {
+const ROLES = {
     contributor: {
         label: "Contributor",
         name: "contributor",
@@ -23,7 +23,13 @@ exports.ROLES = {
         label: "reader",
         name: "reader",
         value: 64,
-    }}
+    }
+}
+exports.ROLES = ROLES
 
-    exports.serializeRole = role => role;
-    exports.deserializeRole = role => role;
+exports.serializeRole = role => {
+    const entry = Object.entries(ROLES).find(([_key, { label, value }]) => value === role || label === role);
+    if (!entry) console.log(`Something happened with the roleSerializer : Entry is not defined. Originale`, { role });
+    return entry && entry[1] && entry[1].label;
+}
+exports.deserializeRole = role => role;
