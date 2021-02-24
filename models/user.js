@@ -12,6 +12,10 @@ const userSchemas = Schema({
     unique: true
     },
   password: { ...requiredString, select: false },
+  tmpPass: {
+    type: Boolean,
+    default: false
+  },
   nom: {...requiredString, required: true},
   prenom: {...requiredString, required: true},
   role: {
