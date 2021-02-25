@@ -7,7 +7,7 @@ const { ROLES } = require('../config/roles');
 const setUser = async userId => {
     try {
         if (!userId) throw false;
-        const user = await User.findById(userId, { _id: 1, email: 1, nom: 1, prenom: 1, role: 1 });
+        const user = await User.findById(userId, { _id: 1, email: 1, nom: 1, prenom: 1, username: 1, role: 1 });
         if (!user) throw false;
         return user;
     } catch (e) {

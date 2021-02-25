@@ -1,4 +1,4 @@
-const { login, newUser, changePassword } = require('../controllers/user');
+const { login, newUser, changePassword, updateUserInfo } = require('../controllers/user');
 const User = require('../models/user')
 const crud = require('./utils/crud');
 const { authUser, authRole } = require('../middlewares/auth');
@@ -9,5 +9,6 @@ const router = crud(User, { noUpdate: true, needAuth: true, role: ROLES.admin })
 router.post('/login', login);
 router.post('/newuser', authUser, authRole(ROLES.admin), newUser);
 router.put('/changePassword', authUser, changePassword);
+router.put('/updateUser', authUser, updateUserInfo);
 
 module.exports = router;

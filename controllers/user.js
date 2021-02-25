@@ -12,7 +12,7 @@ const checkPwdStrength = pwd => true;
 exports.login = controller(async ({body: {username, password}}) => {
     const errorMsg = "Creditentials Incorrect";
     
-    const user = await User.findOne({username}, {password: true, username: true, nom: true, prenom: true, role: true, tmpPass: true});
+    const user = await User.findOne({username}, {password: true, username: true, email: true, nom: true, prenom: true, role: true, tmpPass: true});
     if(!user) throw new NotAuthorizedError(errorMsg);
     
     const result = await bcrypt.compare(password, user.password);
@@ -22,6 +22,7 @@ exports.login = controller(async ({body: {username, password}}) => {
             nom: user.nom,
             prenom: user.prenom,
             userId: user._id,
+            email: user.email,
             tmpPass: user.tmpPass === true || undefined,
             role: serializeRole(user.role),
             token: jwt.sign({userId: user._id}, process.env.SECRET_AUTH_TOKEN, {expiresIn: "24h"})
@@ -52,5 +53,23 @@ exports.changePassword = controller(async ({user = {}, body}) => {
     if(!checkPwdStrength(newPassword)) throw new WeakStrengthPassword();
     
     const hashPwd = await bcrypt.hash(newPassword, 10);
-    return User.updateOne({_id: user._id, $set: { password: hashPwd, tmpPass: false }});
-}, ACTION.INFORM);
+    await User.updateOne({_id: user._id, $set: { password: hashPwd, tmpPass: false }});
+    return { tmpPass: false};
+}, ACTION.RESULT);
+
+
+const fieldIsValid = async (field, value, Model) => {
+    if(!field || !Model || !value) return false
+    const res = await Model.exists({[field]: value});
+    if(res) throw new ApiError(`Validation Error: ${field} with ${value} value already exist`);
+}
+exports.updateUserInfo = controller(async({user = {}, body}) => {
+    let { username, nom, prenom, email } = body;
+    console.log({user})
+    if(username == user.username) username = undefined;
+    if(email == user.email) email = undefined;
+
+    if(!user || !user._id) throw new ServerError("Connected user informations are not findable");
+    await Promise.all([fieldIsValid('email', email, User), fieldIsValid('username',username, User) ]);
+    return User.findByIdAndUpdate(user._id, { username, nom, prenom, email }, {new: true, omitUndefined: true, select:{ username: true, nom: true, prenom: true, email: true } });
+}, ACTION.RESULT);

@@ -14,14 +14,16 @@ const userSchemas = Schema({
   password: { ...requiredString, select: false },
   tmpPass: {
     type: Boolean,
-    default: false
+    default: false,
+    select: false
   },
   nom: {...requiredString, required: true},
   prenom: {...requiredString, required: true},
   role: {
     type: Number,
     required: true,
-    enum: Object.values(ROLES).map(({value}) => value)
+    enum: Object.values(ROLES).map(({value}) => value),
+    select: false
   },
   inMailList: {
     type: Boolean,
@@ -31,6 +33,7 @@ const userSchemas = Schema({
     required: true,
     type: Schema.Types.ObjectId,
     ref: "User",
+    select: false
   }
 });
     
