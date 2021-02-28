@@ -3,6 +3,8 @@ services:
     db:
         image : mongo
         container_name: gdpcm_db
+        networks:
+            - mongodb_network
         env_file: .env
         environment:
         - PUID=1000
