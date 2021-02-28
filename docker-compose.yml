@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-    gdpcm_db_service:
+    db:
         image : mongo
         container_name: gdpcm_db
         env_file: .env
@@ -8,23 +8,21 @@ services:
         - PUID=1000
         - PGID=1000
         volumes:
-        - ./usr/database:/data/db
-        ports:
+        - /usr/database:/data/db
+        ports: 
         - 27017:27017
         restart: unless-stopped
-    # gdpcm_api_service:
-    #     build: .
-    #     depends_on: 
-    #         - gdpcm_db_service
-    #     restart: unless-stopped
-    #     container_name: gdpcm_api
-    #     networks:
-    #         - mongodb_network
-    #     volumes: 
-    #         - .:/app
-    #     env_file: .env
-    #     ports: 
-    #         - "8080:3008"
+    api:
+        build: .
+        depends_on: 
+            - db
+        restart: unless-stopped
+        container_name: gdpcm_api
+        networks:
+            - mongodb_network
+        env_file: .env
+        ports: 
+            - "3008:3008"
 networks:
     mongodb_network:
         name: mongodb_network

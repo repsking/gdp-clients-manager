@@ -28,7 +28,7 @@ const dbUrl = (type = 'online') => {
 exports.connectMongoDb = async () => {
   try {
     await mongoose
-    .connect(dbUrl('online'),
+    .connect(dbUrl(process.env.DB_ORIGIN || 'online'),
       { useNewUrlParser: true, useUnifiedTopology: true }
     )
     console.log("Mongo Databse connected");
