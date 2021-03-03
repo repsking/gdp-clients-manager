@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { NotAuthorizedError, PasswordsDontMatch, WeakStrengthPassword, ApiError, ServerError } = require("../Errors");
 const {controller, ACTION} = require('./utils/controller')
-const { serializeRole, deserializeRole } = require('../config/roles');
+const { serializeRole, deserializeRole, ROLES } = require('../config/roles');
 
 require('dotenv').config();
 
@@ -73,3 +73,9 @@ exports.updateUserInfo = controller(async({user = {}, body}) => {
     await Promise.all([fieldIsValid('email', email, User), fieldIsValid('username',username, User) ]);
     return User.findByIdAndUpdate(user._id, { username, nom, prenom, email }, {new: true, omitUndefined: true, select:{ username: true, nom: true, prenom: true, email: true } });
 }, ACTION.RESULT);
+
+exports.getContributors = controller(async({user = {}}) => {
+    return User.find(
+        {id: {$not: { $eq: user._id }  },role: { $in: [ ROLES.contributor.value,ROLES.admin.value ]}}, 
+        {id: true, nom: true, prenom: true, email: true})
+},ACTION.RESULT);
