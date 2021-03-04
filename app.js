@@ -17,6 +17,7 @@ const rolesRouter = require('./routes/roles')
 const originsRouter = require('./routes/origin')
 const actionsRouter = require('./routes/action')
 const demandsRouter = require('./routes/demands');
+const contactsRouter = require('./routes/contact');
 const fixturesRouter = require("./routes/fixtures")
 
 connectMongoDb();
@@ -41,6 +42,8 @@ app.use(`/${API_PREFIX}/roles`, authUser, rolesRouter)
 app.use(`/${API_PREFIX}/origins`, authUser, originsRouter)
 app.use(`/${API_PREFIX}/actions`, authUser, actionsRouter)
 app.use(`/${API_PREFIX}/fixtures`, authUser, fixturesRouter)
+app.use(`/${API_PREFIX}/contacts`, authUser, contactsRouter)
+
 
 // 404 handler
 app.use((req, res, next) => next(NotFoundError()));
