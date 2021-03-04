@@ -3,7 +3,7 @@ const { authUser, authRole } = require('../../middlewares/auth')
 const { ApiError } = require('../../Errors');
 const { controller, ACTION } = require('../../controllers/utils/controller');
 
-module.exports = (Collection, { noCreate, noCreateMany, noList, noGet, noSearch, noUpdate, noCount, noDelete, needAuth, role } = {}) => {
+module.exports = (Collection, { noCreate, noCreateMany, noList, noGet, noSearch, noUpdate, noCount, noDelete, needAuth, role, router } = {}) => {
 
     const create = controller(async({ body }) => {
         const result = new Collection({...body });
@@ -37,20 +37,20 @@ module.exports = (Collection, { noCreate, noCreateMany, noList, noGet, noSearch,
 
     const remove = controller(({ params: { id: _id } }) => Collection.deleteOne({ _id }), ACTION.INFORM);
 
-    const router = express.Router();
+    const routerEngine = router || express.Router();
     const middlewares = [];
     if (needAuth) {
         middlewares.push(authUser)
         if (role) middlewares.push(authRole(role))
     }
 
-    !noList && router.get('/', middlewares, list);
-    !noCount && router.get('/count', middlewares, count);
-    !noSearch && router.get('/search/:query', middlewares, search);
-    !noGet && router.get('/:id', middlewares, get);
-    !noCreate && router.post('/', middlewares, create);
-    !noCreateMany && router.post('/many', middlewares, createMany);
-    !noUpdate && router.put('/:id', middlewares, update);
-    !noDelete && router.delete('/:id', middlewares, remove);
-    return router;
+    !noList && routerEngine.get('/', middlewares, list);
+    !noCount && routerEngine.get('/count', middlewares, count);
+    !noSearch && routerEngine.get('/search/:query', middlewares, search);
+    !noGet && routerEngine.get('/:id', middlewares, get);
+    !noCreate && routerEngine.post('/', middlewares, create);
+    !noCreateMany && routerEngine.post('/many', middlewares, createMany);
+    !noUpdate && routerEngine.put('/:id', middlewares, update);
+    !noDelete && routerEngine.delete('/:id', middlewares, remove);
+    return routerEngine;
 }

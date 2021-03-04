@@ -3,7 +3,8 @@ const {authUser, authRole} = require('../middlewares/auth');
 const { ROLES } = require("../config/roles")
 const {addComment, assignToUser, removeComment, createProgramDemand, createCommonDemand, createBeContactedDemand, paginatedList, importDemands, generateContact} = require('../controllers/demands');
 const ehpad = require('../controllers/ehpad');
-const router = require('./utils/crud')(Demands, {noCreate: true, noGet: true, needAuth: true, role: ROLES.contributor });
+const { Router } = require('express');
+const router = Router();
  
 router.get('/paginated', authUser, paginatedList)
 router.post('/common', createCommonDemand)
@@ -15,4 +16,5 @@ router.post('/assignTo/:id', authUser, authRole(ROLES.admin), assignToUser)
 router.post('/import', authUser, authRole(ROLES.reps), importDemands)
 router.post('/generateContact/:id', authUser, generateContact)
 router.post('/ehpad', ehpad)
-module.exports = router;
+
+module.exports = require('./utils/crud')(Demands, {router, noCreate: true, needAuth: true, role: ROLES.contributor });
