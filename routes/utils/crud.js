@@ -27,7 +27,7 @@ module.exports = (Collection, { noCreate, noCreateMany, noList, noGet, noSearch,
 
     const get = controller(async({ params }) => {
         const result = await Collection.findOne({ _id: params.id });
-        if (!result) throw ApiError('Ressource Not found', 404);
+        if (!result) throw new ApiError('Ressource Not found', 404);
         return result;
     }, ACTION.RESULT);
 
