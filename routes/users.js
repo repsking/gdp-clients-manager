@@ -11,6 +11,6 @@ router.get('/contributors', authUser, authRole(ROLES.contributor), getContributo
 router.post('/newuser', authUser, authRole(ROLES.admin), newUser);
 router.put('/changePassword', authUser, changePassword);
 router.put('/updateUser', authUser, updateUserInfo);
-router.get('/test', (req,res) => res.json('test') );
+router.get('/test', (req,res) => res.json('Again') );
 
 module.exports = crud(User, { router, needAuth: true, role: ROLES.admin });
