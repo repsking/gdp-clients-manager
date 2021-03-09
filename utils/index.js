@@ -4,3 +4,5 @@ exports.cleanUndefined = (obj) => {
     }
     return obj;
 }
+
+exports.hasUndefined = obj => Object.keys(obj).some(key => obj[key] === undefined)

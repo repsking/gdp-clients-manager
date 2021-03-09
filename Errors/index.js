@@ -34,7 +34,7 @@ exports.NotFoundError = (message) => new NotFoundError(message);
 
 exports.NotAuthorizedError = class NotAuthorizedError extends ApiError {
     constructor(message) {
-        super(message || 'User Not authorized to access to this ressource', 401);
+        super(message || "You're not authorized to access to this ressource", 401);
     }
 }
 

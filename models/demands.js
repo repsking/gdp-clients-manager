@@ -5,11 +5,11 @@ const { searchFieldFilter } = require('./utils/utils')
 
 
 const programmeSchemas = Schema({
-    name: String,
-    id: String,
-    ville: String,
-    gestionnaire: String,
-    thematique: String 
+    name: requiredString,
+    id: requiredString,
+    ville: requiredString,
+    gestionnaire: requiredString,
+    thematique: requiredString 
 })
 const userSchemas = Schema({
 
