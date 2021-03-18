@@ -14,9 +14,9 @@ module.exports = (err, req, res, next) => {
                 break;
         }
         if (!err.isHandled) {
-            console.log("\x1b[31m", "*** An unhandled error occuring ***");
-            console.warn("\x1b[0m", err);
-            console.log("\x1b[31m", "*** Error End ***");
+            console.error("\x1b[31m", "*** An unhandled error occuring ***");
+            console.error("\x1b[0m", err);
+            console.error("\x1b[31m", "*** Error End ***");
         }
         const resp = {
             status: err.status || 500,
