@@ -1,6 +1,6 @@
 const logger = require('morgan')
-const {connectMongoDb} = require("./config/db");
-const {authUser} = require("./middlewares/auth")
+const { connectMongoDb } = require("./config/db");
+const { authUser } = require("./middlewares/auth")
 const { sanitize } = require('./middlewares/sanitize')
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -8,7 +8,7 @@ const { json } = require('body-parser');
 const express = require('express');
 const app = express();
 const { NotFoundError } = require('./Errors')
-const errorMiddleware   = require('./middlewares/errors')
+const errorMiddleware = require('./middlewares/errors')
 
 // All App Routers
 const usersRouter = require('./routes/users');
@@ -23,7 +23,11 @@ const fixturesRouter = require("./routes/fixtures")
 connectMongoDb();
 mongoose.set("toJSON", { virtuals: true });
 
-app.use(logger('dev'));
+if (app.get('env') === 'production') {
+    app.use(logger('combined'));
+} else {
+    app.use(logger('dev'));
+}
 app.use(cors());
 app.use(json());
 
@@ -34,7 +38,7 @@ app.use(sanitize);
 
 // Opened Routes which doesn't need Authentification token
 app.use(`/${API_PREFIX}/users`, usersRouter);
-app.use(`/${API_PREFIX}/demands`,demandsRouter);
+app.use(`/${API_PREFIX}/demands`, demandsRouter);
 
 // Routes which need Authentification
 app.use(`/${API_PREFIX}/status`, authUser, statusRouter)
